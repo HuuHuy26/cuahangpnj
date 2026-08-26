@@ -1,0 +1,8 @@
+{
+  "name": "3AE Diamond & Fine Jewelry",
+  "description": "Nền tảng thương mại điện tử kim cương và trang sức cao cấp phong cách sang trọng, tiêu chuẩn 4C, chứng nhận GIA, giỏ hàng, thanh toán và hệ thống quản trị.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
