@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Gem, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  ShieldCheck, 
-  Sparkles, 
-  Truck, 
-  RotateCcw, 
+import {
+  Gem,
+  MapPin,
+  Phone,
+  Mail,
+  ShieldCheck,
+  Sparkles,
+  Truck,
+  RotateCcw,
   CheckCircle,
   Facebook,
   Instagram,
@@ -86,7 +86,7 @@ export const Footer: React.FC = () => {
       {/* Main Footer Links */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          
+
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="flex items-center gap-2">
@@ -102,19 +102,19 @@ export const Footer: React.FC = () => {
             <div className="space-y-2 text-xs text-gray-300">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
-                <span>Showroom Flagship: Tòa nhà Diamond Tower, 128 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh</span>
+                <span>Showroom Flagship: Tòa nhà Diamond Tower, 47-48 TT16 , Khu Đô Thị Văn Phú, Hà Đông ,Hà Nội</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
-                <span>Showroom Hà Nội: 68 Tràng Tiền, Hoàn Kiếm, TP. Hà Nội</span>
+                <span>Showroom Hà Nội: LandMark72, Nam Từ Liêm, TP. Hà Nội</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-[#C5A059] shrink-0" />
-                <span>Hotline VIP: 1800 5454 57 (08:30 - 21:30 hàng ngày)</span>
+                <span>Hotline VIP: 0868 895 658 (08:30 - 21:30 hàng ngày)</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[#C5A059] shrink-0" />
-                <span>Email hỗ trợ: contact@diamond-jewelry.vn</span>
+                <span>Email hỗ trợ: vietkhoi@diamond-jewelry.vn</span>
               </div>
             </div>
           </div>
@@ -200,6 +200,6 @@ export const Footer: React.FC = () => {
           Mọi thông tin sản phẩm và giấy kiểm định GIA/IGI được mô phỏng chuẩn xác phục vụ khách hàng.
         </p>
       </div>
-    </footer>
+    </footer >
   );
 };
