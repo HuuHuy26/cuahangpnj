@@ -218,8 +218,8 @@ export const ProductDetailPage: React.FC = () => {
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
                     className={`w-20 h-20 shrink-0 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === idx
-                        ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
-                        : 'border-gray-200 opacity-60 hover:opacity-100'
+                      ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
+                      : 'border-gray-200 opacity-60 hover:opacity-100'
                       }`}
                   >
                     <img
@@ -378,8 +378,8 @@ export const ProductDetailPage: React.FC = () => {
                         key={s}
                         onClick={() => setSelectedSize(s)}
                         className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all ${selectedSize === s
-                            ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C] shadow-sm'
-                            : 'bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37]'
+                          ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C] shadow-sm'
+                          : 'bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37]'
                           }`}
                       >
                         {s}
@@ -467,8 +467,8 @@ export const ProductDetailPage: React.FC = () => {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
                 className={`pb-4 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap ${activeTab === tab.key
-                    ? 'text-[#0B192C] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#D4AF37]'
-                    : 'text-gray-400 hover:text-gray-700'
+                  ? 'text-[#0B192C] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#D4AF37]'
+                  : 'text-gray-400 hover:text-gray-700'
                   }`}
               >
                 {tab.label}

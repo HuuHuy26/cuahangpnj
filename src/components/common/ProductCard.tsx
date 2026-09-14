@@ -66,11 +66,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
             e.preventDefault();
             toggleFavorite(product);
           }}
-          className={`absolute top-3 right-3 p-2 backdrop-blur-md transition-all z-10 ${
-            favorite
+          className={`absolute top-3 right-3 p-2 backdrop-blur-md transition-all z-10 ${favorite
               ? 'bg-white text-red-600 shadow-md'
               : 'bg-white/80 text-[#003366] hover:text-[#C5A059] hover:bg-white shadow-xs'
-          }`}
+            }`}
           title={favorite ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích'}
         >
           <Heart className={`w-4 h-4 ${favorite ? 'fill-current' : ''}`} />
@@ -165,11 +164,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
                 addItem(product, 1);
               }}
               disabled={product.stock <= 0}
-              className={`p-2 transition-all ${
-                product.stock <= 0
+              className={`p-2 transition-all ${product.stock <= 0
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   : 'bg-[#FAF9F6] border border-[#E5E2D9] text-[#003366] hover:bg-[#003366] hover:text-white'
-              }`}
+                }`}
               title={product.stock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
             >
               <ShoppingBag className="w-4 h-4" />

@@ -69,8 +69,6 @@ const initStorage = () => {
   }
 };
 
-initStorage();
-
 // Axios Instance configured for Laravel API
 export const apiClient = axios.create({
   baseURL: '/api',
@@ -107,6 +105,8 @@ const setStored = <T>(key: string, value: T): void => {
     console.error('Error writing localStorage', e);
   }
 };
+
+initStorage();
 
 export const apiService = {
   // Authentication

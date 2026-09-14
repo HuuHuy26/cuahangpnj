@@ -64,9 +64,8 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedImage === idx ? 'border-[#D4AF37] shadow-md' : 'border-transparent opacity-70 hover:opacity-100'
-                    }`}
+                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === idx ? 'border-[#D4AF37] shadow-md' : 'border-transparent opacity-70 hover:opacity-100'
+                      }`}
                   >
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>
@@ -159,11 +158,10 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                       <button
                         key={s}
                         onClick={() => setSelectedSize(s)}
-                        className={`px-3 py-1.5 rounded text-xs font-semibold border transition-all ${
-                          (selectedSize || availableSizes[0]) === s
+                        className={`px-3 py-1.5 rounded text-xs font-semibold border transition-all ${(selectedSize || availableSizes[0]) === s
                             ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C]'
                             : 'bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37]'
-                        }`}
+                          }`}
                       >
                         {s}
                       </button>
@@ -206,11 +204,10 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
 
               <button
                 onClick={() => toggleFavorite(product)}
-                className={`p-3 rounded-xl border transition-all ${
-                  favorite
+                className={`p-3 rounded-xl border transition-all ${favorite
                     ? 'border-red-300 bg-red-50 text-red-600'
                     : 'border-gray-300 text-gray-600 hover:text-red-500'
-                }`}
+                  }`}
               >
                 <Heart className={`w-5 h-5 ${favorite ? 'fill-current' : ''}`} />
               </button>

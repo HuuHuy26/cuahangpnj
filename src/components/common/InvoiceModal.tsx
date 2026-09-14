@@ -17,7 +17,7 @@ function numberToVietnameseWords(num: number): string {
   const millions = Math.floor(num / 1000000);
   const thousands = Math.floor((num % 1000000) / 1000);
   const remainder = num % 1000;
-  
+
   let result = '';
   if (millions > 0) {
     result += `${millions.toLocaleString('vi-VN')} triệu `;
@@ -238,7 +238,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                 <strong className="block uppercase text-gray-900">Người Bán Hàng</strong>
                 <span className="text-[10px] text-gray-500 italic">(Ký số điện tử hợp chuẩn)</span>
               </div>
-              
+
               {/* Digital Certificate Stamp */}
               <div className="inline-block p-2.5 bg-emerald-50 border-2 border-dashed border-emerald-500 rounded-xl text-left text-[10px] space-y-0.5 shadow-xs">
                 <div className="flex items-center gap-1 text-emerald-700 font-bold">

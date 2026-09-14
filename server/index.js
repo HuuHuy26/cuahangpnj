@@ -21,7 +21,10 @@ app.use(express.json());
 
 // MongoDB Connection
 let isConnected = false;
-mongoose.connect(MONGODB_URI)
+mongoose.connect(MONGODB_URI, {
+  serverSelectionTimeoutMS: 3000,
+  connectTimeoutMS: 3000,
+})
   .then(() => {
     isConnected = true;
     console.log('✅ Connected to MongoDB Compass Database: lumiere_jewelry');
@@ -229,7 +232,7 @@ app.post('/api/orders', async (req, res) => {
   try {
     const orderCode = '3AE-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
     const newId = req.body._id || 'ord-' + Date.now();
-    
+
     // Calculate VAT (10%)
     const subtotal = Number(req.body.subtotal) || 0;
     const discount = Number(req.body.discount) || 0;
@@ -382,7 +385,7 @@ app.post('/api/auth/verify-otp', async (req, res) => {
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, phone, password, otp } = req.body;
-    
+
     // Check if user already exists
     const existing = await User.findOne({ $or: [{ email: email.toLowerCase() }, { phone }] });
     if (existing) {
@@ -391,7 +394,7 @@ app.post('/api/auth/register', async (req, res) => {
 
     // Check OTP if provided
     if (otp) {
-      const otpRecord = await Otp.findOne({ 
+      const otpRecord = await Otp.findOne({
         $or: [{ target: phone }, { target: email }],
         otp,
         expiresAt: { $gt: new Date() }
@@ -560,8 +563,8 @@ app.post('/api/users', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Vui lòng cung cấp Họ tên và Email!' });
     }
 
-    const existing = await User.findOne({ 
-      $or: [{ email: email.toLowerCase() }, ...(phone ? [{ phone }] : [])] 
+    const existing = await User.findOne({
+      $or: [{ email: email.toLowerCase() }, ...(phone ? [{ phone }] : [])]
     });
     if (existing) {
       return res.status(400).json({ success: false, message: 'Email hoặc Số điện thoại này đã tồn tại trong hệ thống!' });

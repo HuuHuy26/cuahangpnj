@@ -45,11 +45,10 @@ export const DiamondStandardsModal: React.FC<DiamondStandardsModalProps> = ({ is
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
-                className={`flex items-center gap-2 px-4 py-3 text-xs font-semibold whitespace-nowrap transition-all border-b-2 ${
-                  activeTab === tab.key
-                    ? 'border-[#D4AF37] text-[#0B192C] bg-white'
-                    : 'border-transparent text-gray-500 hover:text-gray-900'
-                }`}
+                className={`flex items-center gap-2 px-4 py-3 text-xs font-semibold whitespace-nowrap transition-all border-b-2 ${activeTab === tab.key
+                  ? 'border-[#D4AF37] text-[#0B192C] bg-white'
+                  : 'border-transparent text-gray-500 hover:text-gray-900'
+                  }`}
               >
                 <Icon className="w-4 h-4 text-[#D4AF37]" />
                 {tab.label}
@@ -64,7 +63,7 @@ export const DiamondStandardsModal: React.FC<DiamondStandardsModalProps> = ({ is
             <div className="space-y-4">
               <h4 className="text-base font-bold text-[#0B192C]">Carat (Trọng lượng & Kích thước)</h4>
               <p>
-                Carat (viết tắt là <strong>ct</strong>) là đơn vị đo trọng lượng tiêu chuẩn của kim cương (1 carat = 200 miligam = 0.2 gram). 
+                Carat (viết tắt là <strong>ct</strong>) là đơn vị đo trọng lượng tiêu chuẩn của kim cương (1 carat = 200 miligam = 0.2 gram).
                 Kích thước đường kính của kim cương giác cắt tròn tiêu chuẩn tương ứng:
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
