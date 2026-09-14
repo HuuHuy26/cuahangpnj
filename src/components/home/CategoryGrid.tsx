@@ -44,9 +44,12 @@ export const CategoryGrid: React.FC = () => {
             >
               {/* Background Image */}
               <img
-                src={category.image}
+                src={category.image || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80'}
                 alt={category.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80';
+                }}
               />
               
               {/* Dark Gradient Overlay */}

@@ -7,6 +7,7 @@ export interface User {
   role: 'customer' | 'admin';
   avatar?: string;
   createdAt: string;
+  isPhoneVerified?: boolean;
 }
 
 export interface Category {

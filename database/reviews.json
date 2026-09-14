@@ -1,0 +1,37 @@
+[
+  {
+    "_id": "rev-1",
+    "productId": "prod-1",
+    "userId": "usr-customer-1",
+    "userName": "Nguyễn Thuỳ Linh",
+    "userAvatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+    "rating": 5,
+    "comment": "Viên kim cương cực kỳ sáng lửa, quét mã QR ra chứng nhận GIA chuẩn xác từng thông số. Đóng gói hộp nhung sang trọng đẳng cấp đúng chất thương hiệu lớn!",
+    "isVerifiedPurchase": true,
+    "status": "approved",
+    "createdAt": "2026-02-16T09:20:00Z"
+  },
+  {
+    "_id": "rev-2",
+    "productId": "prod-2",
+    "userId": "usr-customer-2",
+    "userName": "Trần Hoàng Nam",
+    "userAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+    "rating": 5,
+    "comment": "Tôi mua chiếc nhẫn Solitaire này để cầu hôn và bạn gái tôi vỡ òa vì xúc động. Thiết kế 6 chấu ôm trọn viên kim cương trông rất lớn và sáng rực rỡ.",
+    "isVerifiedPurchase": true,
+    "status": "approved",
+    "createdAt": "2026-02-19T14:40:00Z"
+  },
+  {
+    "_id": "rev-3",
+    "productId": "prod-5",
+    "userId": "usr-customer-1",
+    "userName": "Lê Minh Khang",
+    "rating": 5,
+    "comment": "Cặp nhẫn cưới hoàn thiện rất mượt mà, vàng 18K sắc sảo và được hỗ trợ khắc tên miễn phí rất ý nghĩa.",
+    "isVerifiedPurchase": true,
+    "status": "approved",
+    "createdAt": "2026-02-23T11:00:00Z"
+  }
+]

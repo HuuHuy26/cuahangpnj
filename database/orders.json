@@ -1,0 +1,114 @@
+[
+  {
+    "_id": "ord-1001",
+    "orderCode": "LUM-2026-8910",
+    "userId": "usr-customer-1",
+    "customerInfo": {
+      "fullName": "Nguyễn Thuỳ Linh",
+      "phone": "0988776655",
+      "email": "linh.nguyen@gmail.com"
+    },
+    "shippingAddress": {
+      "fullName": "Nguyễn Thuỳ Linh",
+      "phone": "0988776655",
+      "email": "linh.nguyen@gmail.com",
+      "province": "TP. Hồ Chí Minh",
+      "district": "Quận 1",
+      "ward": "Phường Bến Nghé",
+      "streetAddress": "Căn hộ 1804, Vinhomes Golden River"
+    },
+    "items": [
+      {
+        "productId": "prod-2",
+        "productName": "Nhẫn Kim Cương Solitaire Hoàng Gia Vàng Trắng 18K",
+        "productSku": "RNG-SOL-18KW-085",
+        "productImage": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80",
+        "price": 92000000,
+        "quantity": 1,
+        "size": "11",
+        "material": "Vàng Trắng 18K"
+      }
+    ],
+    "subtotal": 92000000,
+    "discount": 4600000,
+    "couponCode": "3AE2026",
+    "shippingFee": 0,
+    "total": 87400000,
+    "paymentMethod": "BANK_TRANSFER",
+    "paymentStatus": "Đã thanh toán",
+    "orderStatus": "Đang giao hàng",
+    "note": "Giao hàng bằng hộp quà cao cấp và thẻ bảo hành GIA.",
+    "timeline": [
+      {
+        "status": "Chờ xác nhận",
+        "time": "2026-02-20T10:00:00Z",
+        "description": "Đơn hàng được khởi tạo thành công."
+      },
+      {
+        "status": "Đã xác nhận",
+        "time": "2026-02-20T10:15:00Z",
+        "description": "Chuyên viên tư vấn xác nhận thông tin đơn hàng."
+      },
+      {
+        "status": "Đang chuẩn bị",
+        "time": "2026-02-20T14:30:00Z",
+        "description": "Kiểm tra chất lượng vàng và niêm phong giấy kiểm định GIA."
+      },
+      {
+        "status": "Đang giao hàng",
+        "time": "2026-02-21T08:00:00Z",
+        "description": "Đơn vị vận chuyển bọc thép bảo hiểm đang tiến hành giao."
+      }
+    ],
+    "createdAt": "2026-02-20T10:00:00Z",
+    "updatedAt": "2026-02-21T08:00:00Z"
+  },
+  {
+    "_id": "ord-1002",
+    "orderCode": "LUM-2026-9204",
+    "userId": "usr-customer-2",
+    "customerInfo": {
+      "fullName": "Trần Hoàng Nam",
+      "phone": "0912345678",
+      "email": "khachhang@gmail.com"
+    },
+    "shippingAddress": {
+      "fullName": "Trần Hoàng Nam",
+      "phone": "0912345678",
+      "email": "khachhang@gmail.com",
+      "province": "Hà Nội",
+      "district": "Tây Hồ",
+      "ward": "Phường Xuân La",
+      "streetAddress": "Biệt thự B2-12, KĐT Ciputra"
+    },
+    "items": [
+      {
+        "productId": "prod-5",
+        "productName": "Cặp Nhẫn Cưới Tình Yêu Vĩnh Cửu Eternity Vàng Vàng 18K",
+        "productSku": "WED-ETERN-PAIR-18KY",
+        "productImage": "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=600&q=80",
+        "price": 45000000,
+        "quantity": 1,
+        "size": "Cặp tiêu chuẩn 11-17",
+        "material": "Vàng Vàng 18K"
+      }
+    ],
+    "subtotal": 45000000,
+    "discount": 0,
+    "shippingFee": 0,
+    "total": 45000000,
+    "paymentMethod": "COD",
+    "paymentStatus": "Chưa thanh toán",
+    "orderStatus": "Chờ xác nhận",
+    "note": "Khắc laser tên Nam & Lan 26.10",
+    "timeline": [
+      {
+        "status": "Chờ xác nhận",
+        "time": "2026-02-25T11:20:00Z",
+        "description": "Đơn hàng mới chờ bộ phận kinh doanh duyệt."
+      }
+    ],
+    "createdAt": "2026-02-25T11:20:00Z",
+    "updatedAt": "2026-02-25T11:20:00Z"
+  }
+]

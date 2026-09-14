@@ -1,0 +1,56 @@
+[
+  {
+    "_id": "cat-1",
+    "name": "Kim Cương Viên (Loose Diamonds)",
+    "slug": "kim-cuong-vien",
+    "description": "Kim cương thiên nhiên kiểm định quốc tế GIA, IGI với độ tinh khiết hoàn mỹ và giác cắt xuất sắc.",
+    "image": "https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?auto=format&fit=crop&w=800&q=80",
+    "itemCount": 8,
+    "featured": true
+  },
+  {
+    "_id": "cat-2",
+    "name": "Nhẫn Kim Cương Nữ",
+    "slug": "nhan-kim-cuong-nu",
+    "description": "Tuyệt tác nhẫn cầu hôn, nhẫn thời trang đính kim cương tự nhiên tôn vinh nét kiêu sa của quý cô.",
+    "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
+    "itemCount": 12,
+    "featured": true
+  },
+  {
+    "_id": "cat-3",
+    "name": "Trang Sức Cưới & Nhẫn Cặp",
+    "slug": "trang-suc-cuoi",
+    "description": "Lời nguyện ước vĩnh cửu đan dệt trong từng đường nét tinh xảo của cặp nhẫn cưới và trang sức vu quy.",
+    "image": "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80",
+    "itemCount": 6,
+    "featured": true
+  },
+  {
+    "_id": "cat-4",
+    "name": "Dây Chuyền & Mặt Dây Kim Cương",
+    "slug": "day-chuyen-kim-cuong",
+    "description": "Điểm nhấn lấp lánh nơi xương quai xanh với thiết kế mặt dây thanh lịch từ vàng 18K và kim cương.",
+    "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
+    "itemCount": 8,
+    "featured": true
+  },
+  {
+    "_id": "cat-5",
+    "name": "Bông Tai Kim Cương",
+    "slug": "bong-tai-kim-cuong",
+    "description": "Hoa tai kim cương mang vẻ đẹp rạng ngời, tô điểm gương mặt thêm bừng sáng và quý phái.",
+    "image": "https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=800&q=80",
+    "itemCount": 6,
+    "featured": true
+  },
+  {
+    "_id": "cat-6",
+    "name": "Vòng & Lắc Tay Kim Cương",
+    "slug": "vong-lac-tay-kim-cuong",
+    "description": "Vòng tay Tennis Bracelet và lắc tay đính kim cương sang trọng chuẩn mực hoàng gia.",
+    "image": "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=800&q=80",
+    "itemCount": 5,
+    "featured": false
+  }
+]

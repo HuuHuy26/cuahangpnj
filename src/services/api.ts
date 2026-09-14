@@ -25,13 +25,22 @@ const STORAGE_KEYS = {
   TOKEN: 'lumiere_auth_token',
 };
 
-// Initialize Storage with Seed Data if empty
+const DATA_VERSION = 'v4_unique_hd_images';
+
+// Initialize Storage with Seed Data if empty or version changed
 const initStorage = () => {
-  if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
+  const currentVersion = localStorage.getItem('lumiere_data_version');
+  if (currentVersion !== DATA_VERSION) {
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
-  }
-  if (!localStorage.getItem(STORAGE_KEYS.CATEGORIES)) {
     localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(INITIAL_CATEGORIES));
+    localStorage.setItem('lumiere_data_version', DATA_VERSION);
+  } else {
+    if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.CATEGORIES)) {
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(INITIAL_CATEGORIES));
+    }
   }
   if (!localStorage.getItem(STORAGE_KEYS.ORDERS)) {
     localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(INITIAL_ORDERS));
@@ -779,6 +788,151 @@ export const apiService = {
       banners = banners.filter(b => b._id !== id);
       setStored(STORAGE_KEYS.BANNERS, banners);
       return { success: true, message: 'Đã xóa banner' };
+    }
+  },
+
+  // Users & Customer Management
+  users: {
+    async getAll(params?: { search?: string; role?: string }) {
+      try {
+        const res = await apiClient.get('/users', { params });
+        if (res.data?.success && res.data.data) {
+          return res.data;
+        }
+      } catch (e) {
+        // Fallback to localStorage
+      }
+      let users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+      if (params?.role && params.role !== 'all') {
+        users = users.filter(u => u.role === params.role);
+      }
+      if (params?.search) {
+        const q = params.search.toLowerCase().trim();
+        users = users.filter(u =>
+          (u.name && u.name.toLowerCase().includes(q)) ||
+          (u.email && u.email.toLowerCase().includes(q)) ||
+          (u.phone && u.phone.includes(q)) ||
+          (u.address && u.address.toLowerCase().includes(q))
+        );
+      }
+      return { success: true, count: users.length, data: users };
+    },
+
+    async getById(id: string) {
+      try {
+        const res = await apiClient.get(`/users/${id}`);
+        if (res.data?.success && res.data.data) {
+          return res.data;
+        }
+      } catch (e) {
+        // Fallback
+      }
+      const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+      const user = users.find(u => u._id === id);
+      if (!user) throw new Error('Không tìm thấy thông tin khách hàng!');
+      return { success: true, data: user };
+    },
+
+    async create(userData: Partial<User> & { password?: string }) {
+      try {
+        const res = await apiClient.post('/users', userData);
+        if (res.data?.success) {
+          const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+          if (!users.some(u => u._id === res.data.data._id)) {
+            users.unshift(res.data.data);
+            setStored(STORAGE_KEYS.USERS, users);
+          }
+          return res.data;
+        }
+      } catch (e: any) {
+        if (e.response?.data?.message) {
+          throw new Error(e.response.data.message);
+        }
+      }
+
+      // LocalStorage Fallback
+      const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+      if (users.some(u => u.email.toLowerCase() === (userData.email || '').toLowerCase())) {
+        throw new Error('Email này đã được sử dụng bởi khách hàng khác!');
+      }
+
+      const newUser: User = {
+        _id: userData._id || 'usr-' + Date.now(),
+        name: userData.name || 'Khách Hàng Mới',
+        email: (userData.email || '').toLowerCase(),
+        phone: userData.phone || '',
+        address: userData.address || '',
+        role: (userData.role as any) || 'customer',
+        avatar: userData.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+        createdAt: new Date().toISOString(),
+        isPhoneVerified: true
+      };
+
+      users.unshift(newUser);
+      setStored(STORAGE_KEYS.USERS, users);
+      return { success: true, message: 'Thêm khách hàng thành công!', data: newUser };
+    },
+
+    async update(id: string, updateData: Partial<User> & { password?: string }) {
+      try {
+        const res = await apiClient.put(`/users/${id}`, updateData);
+        if (res.data?.success) {
+          const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+          const idx = users.findIndex(u => u._id === id);
+          if (idx !== -1) {
+            users[idx] = { ...users[idx], ...res.data.data };
+            setStored(STORAGE_KEYS.USERS, users);
+          }
+          return res.data;
+        }
+      } catch (e: any) {
+        if (e.response?.data?.message) {
+          throw new Error(e.response.data.message);
+        }
+      }
+
+      // LocalStorage Fallback
+      const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+      const idx = users.findIndex(u => u._id === id);
+      if (idx === -1) throw new Error('Không tìm thấy người dùng cần cập nhật!');
+
+      users[idx] = {
+        ...users[idx],
+        ...updateData,
+        email: updateData.email ? updateData.email.toLowerCase() : users[idx].email
+      };
+      setStored(STORAGE_KEYS.USERS, users);
+      return { success: true, message: 'Cập nhật thông tin khách hàng thành công!', data: users[idx] };
+    },
+
+    async delete(id: string) {
+      if (id === 'usr-admin') {
+        throw new Error('Không thể xóa tài khoản Quản Trị Viên gốc của hệ thống!');
+      }
+
+      try {
+        const res = await apiClient.delete(`/users/${id}`);
+        if (res.data?.success) {
+          let users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+          users = users.filter(u => u._id !== id);
+          setStored(STORAGE_KEYS.USERS, users);
+          return res.data;
+        }
+      } catch (e: any) {
+        if (e.response?.data?.message) {
+          throw new Error(e.response.data.message);
+        }
+      }
+
+      let users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+      const user = users.find(u => u._id === id);
+      if (user?.email === 'admin@3ae.vn' || user?.role === 'admin') {
+        throw new Error('Không thể xóa tài khoản Quản Trị Viên chính!');
+      }
+
+      users = users.filter(u => u._id !== id);
+      setStored(STORAGE_KEYS.USERS, users);
+      return { success: true, message: 'Đã xóa người dùng khỏi hệ thống!' };
     }
   },
 

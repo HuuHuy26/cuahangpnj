@@ -30,10 +30,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
       <div className="relative aspect-square overflow-hidden bg-[#FAF9F6] border-b border-[#E5E2D9]">
         <Link to={`/products/${product.slug}`} className="block w-full h-full">
           <img
-            src={isHovered && product.images.length > 1 ? product.images[1] : product.images[0]}
+            src={(isHovered && product.images?.length > 1 ? product.images[1] : product.images?.[0]) || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80'}
             alt={product.name}
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80';
+            }}
           />
         </Link>
 

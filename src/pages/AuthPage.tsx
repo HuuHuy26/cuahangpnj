@@ -70,7 +70,7 @@ export const AuthPage: React.FC = () => {
     setIsSendingOtp(true);
     try {
       const res = await apiService.auth.sendOtp(target, type);
-      setCountdown(60);
+      setCountdown(30);
       showToast(res.message || 'Mã OTP 6 số đã được gửi!', 'success');
 
       // Notify demo OTP on screen for testing ease
@@ -138,7 +138,7 @@ export const AuthPage: React.FC = () => {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resetTarget.trim() || !resetOtp.trim() || !newPassword.trim()) {
-      showToast('Vui lòng điền đầy đủ SĐT/Email, Mã OTP và Mật khẩu mới', 'error');
+      showToast('Vui lòng điền đầy đủ SĐT/Email, Mật khẩu mới , Mã OTP', 'error');
       return;
     }
 
@@ -242,8 +242,8 @@ export const AuthPage: React.FC = () => {
                 type="button"
                 onClick={() => setMode('login')}
                 className={`flex-1 py-2.5 rounded-xl transition-all cursor-pointer ${mode === 'login'
-                    ? 'bg-[#003366] text-[#F4E8C1] shadow-xs'
-                    : 'text-gray-600 hover:text-[#003366]'
+                  ? 'bg-[#003366] text-[#F4E8C1] shadow-xs'
+                  : 'text-gray-600 hover:text-[#003366]'
                   }`}
               >
                 Đăng Nhập
@@ -252,8 +252,8 @@ export const AuthPage: React.FC = () => {
                 type="button"
                 onClick={() => setMode('register')}
                 className={`flex-1 py-2.5 rounded-xl transition-all cursor-pointer ${mode === 'register'
-                    ? 'bg-[#003366] text-[#F4E8C1] shadow-xs'
-                    : 'text-gray-600 hover:text-[#003366]'
+                  ? 'bg-[#003366] text-[#F4E8C1] shadow-xs'
+                  : 'text-gray-600 hover:text-[#003366]'
                   }`}
               >
                 Đăng Ký (OTP)
@@ -392,21 +392,6 @@ export const AuthPage: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-gray-700">Mã xác thực OTP (6 chữ số)</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    maxLength={6}
-                    placeholder="Nhập 6 số OTP (Ví dụ: 123456)"
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                    className="w-full pl-9 pr-3 py-3 bg-[#FAF8F5] border border-gray-200 rounded-xl font-mono text-sm tracking-widest focus:outline-none focus:border-[#C5A059]"
-                  />
-                  <KeyRound className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
                 <label className="font-semibold text-gray-700">Mật khẩu *</label>
                 <div className="relative">
                   <input
@@ -417,6 +402,21 @@ export const AuthPage: React.FC = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-9 pr-10 py-3 bg-[#FAF8F5] border border-gray-200 rounded-xl focus:outline-none focus:border-[#C5A059]"
                   />
+
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-gray-700">Mã xác thực OTP</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        maxLength={6}
+                        placeholder="Nhập 6 số OTP"
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value)}
+                        className="w-full pl-9 pr-3 py-3 bg-[#FAF8F5] border border-gray-200 rounded-xl font-mono text-sm tracking-widest focus:outline-none focus:border-[#C5A059]"
+                      />
+                      <KeyRound className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    </div>
+                  </div>
                   <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <button
                     type="button"
@@ -472,7 +472,7 @@ export const AuthPage: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-gray-700">Mã xác thực OTP (6 chữ số) *</label>
+                <label className="font-semibold text-gray-700">Mã xác thực OTP*</label>
                 <div className="relative">
                   <input
                     type="text"

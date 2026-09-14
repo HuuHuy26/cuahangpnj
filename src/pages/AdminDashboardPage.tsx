@@ -29,7 +29,11 @@ import {
   Sparkles,
   Gem,
   EyeOff,
-  Printer
+  Printer,
+  Phone,
+  MapPin,
+  Calendar,
+  UserCheck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -76,6 +80,14 @@ export const AdminDashboardPage: React.FC = () => {
     minOrderAmount: 10000000,
     isActive: true,
   });
+
+  // Customer Management States
+  const [customerSearchTerm, setCustomerSearchTerm] = useState('');
+  const [customerRoleFilter, setCustomerRoleFilter] = useState<'all' | 'customer' | 'admin'>('all');
+  const [customerModalOpen, setCustomerModalOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<(Partial<User> & { password?: string }) | null>(null);
+  const [customerDetailModalOpen, setCustomerDetailModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<User | null>(null);
 
   useEffect(() => {
     // Kiểm tra quyền: Nếu đã đăng nhập nhưng không phải admin (ví dụ: Khách hàng VIP)
@@ -301,15 +313,143 @@ export const AdminDashboardPage: React.FC = () => {
   const handleUserRoleToggle = async (targetUser: User) => {
     const newRole = targetUser.role === 'admin' ? 'customer' : 'admin';
     try {
-      await apiService.admin.updateUserRole(targetUser._id, newRole);
+      await apiService.users.update(targetUser._id, { role: newRole });
       setUsers((prev) =>
         prev.map((u) => (u._id === targetUser._id ? { ...u, role: newRole } : u))
       );
-      showToast(`Đã thay đổi vai trò của ${targetUser.name} thành ${newRole.toUpperCase()}`, 'success');
-    } catch (err) {
-      showToast('Không thể cập nhật quyền người dùng', 'error');
+      if (selectedCustomer?._id === targetUser._id) {
+        setSelectedCustomer({ ...selectedCustomer, role: newRole });
+      }
+      showToast(`Đã đổi vai trò của ${targetUser.name} thành ${newRole.toUpperCase()}`, 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Không thể cập nhật quyền người dùng', 'error');
     }
   };
+
+  // Open Create Customer Modal
+  const handleOpenCreateCustomer = () => {
+    setEditingCustomer({
+      name: '',
+      email: '',
+      phone: '',
+      password: 'Customer@123',
+      address: '',
+      role: 'customer',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    });
+    setCustomerModalOpen(true);
+  };
+
+  // Open Edit Customer Modal
+  const handleOpenEditCustomer = (customerToEdit: User) => {
+    setEditingCustomer({
+      ...customerToEdit,
+      password: '',
+    });
+    setCustomerModalOpen(true);
+  };
+
+  // Open Customer Detail Modal
+  const handleViewCustomerDetail = (targetCustomer: User) => {
+    setSelectedCustomer(targetCustomer);
+    setCustomerDetailModalOpen(true);
+  };
+
+  // Helper: Find orders belonging to a customer
+  const getCustomerOrders = (targetUser: User) => {
+    return orders.filter(
+      (o) =>
+        (o.userId && o.userId === targetUser._id) ||
+        (o.customerInfo?.email && targetUser.email && o.customerInfo.email.toLowerCase() === targetUser.email.toLowerCase()) ||
+        (o.customerInfo?.phone && targetUser.phone && o.customerInfo.phone === targetUser.phone) ||
+        (o.shippingAddress?.email && targetUser.email && o.shippingAddress.email.toLowerCase() === targetUser.email.toLowerCase())
+    );
+  };
+
+  // Helper: Calculate total spent by customer
+  const getCustomerTotalSpent = (targetUser: User) => {
+    const customerOrders = getCustomerOrders(targetUser);
+    return customerOrders
+      .filter((o) => o.orderStatus !== 'Đã hủy')
+      .reduce((sum, o) => sum + (o.total || 0), 0);
+  };
+
+  // Save (Create or Update) Customer
+  const handleSaveCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCustomer?.name?.trim() || !editingCustomer?.email?.trim()) {
+      showToast('Vui lòng nhập đầy đủ Họ tên và Email!', 'error');
+      return;
+    }
+
+    try {
+      if (editingCustomer._id) {
+        // Update
+        const payload: any = { ...editingCustomer };
+        if (!payload.password) delete payload.password;
+        const res = await apiService.users.update(editingCustomer._id, payload);
+        setUsers((prev) =>
+          prev.map((u) => (u._id === editingCustomer._id ? res.data : u))
+        );
+        if (selectedCustomer?._id === editingCustomer._id) {
+          setSelectedCustomer(res.data);
+        }
+        showToast(`Cập nhật thông tin khách hàng "${res.data.name}" thành công!`, 'success');
+      } else {
+        // Create
+        const res = await apiService.users.create(editingCustomer);
+        setUsers((prev) => [res.data, ...prev]);
+        showToast(`Thêm khách hàng mới "${res.data.name}" thành công!`, 'success');
+      }
+      setCustomerModalOpen(false);
+      setEditingCustomer(null);
+    } catch (err: any) {
+      showToast(err.message || 'Thao tác lưu khách hàng không thành công!', 'error');
+    }
+  };
+
+  // Delete Customer
+  const handleDeleteCustomer = async (customerToDelete: User) => {
+    if (customerToDelete._id === 'usr-admin' || customerToDelete.email === 'admin@3ae.vn') {
+      window.alert('🚫 Không thể xóa tài khoản Quản Trị Viên gốc của hệ thống!');
+      return;
+    }
+    if (user?._id === customerToDelete._id) {
+      window.alert('🚫 Bạn không thể tự xóa tài khoản quản trị đang đăng nhập!');
+      return;
+    }
+
+    if (
+      window.confirm(
+        `⚠️ BẠN CÓ CHẮC MUỐN XÓA KHÁCH HÀNG NÀY?\n\n• Họ tên: ${customerToDelete.name}\n• Email: ${customerToDelete.email}\n• Số điện thoại: ${customerToDelete.phone || 'N/A'}\n\nDữ liệu sau khi xóa sẽ không thể hoàn tác!`
+      )
+    ) {
+      try {
+        await apiService.users.delete(customerToDelete._id);
+        setUsers((prev) => prev.filter((u) => u._id !== customerToDelete._id));
+        if (selectedCustomer?._id === customerToDelete._id) {
+          setCustomerDetailModalOpen(false);
+          setSelectedCustomer(null);
+        }
+        showToast(`Đã xóa khách hàng "${customerToDelete.name}" thành công!`, 'success');
+      } catch (err: any) {
+        showToast(err.message || 'Không thể xóa khách hàng!', 'error');
+      }
+    }
+  };
+
+  // Filtered Users List
+  const filteredUsers = users.filter((u) => {
+    const matchesRole = customerRoleFilter === 'all' || u.role === customerRoleFilter;
+    const q = customerSearchTerm.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      u.name.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      (u.phone && u.phone.includes(q)) ||
+      (u.address && u.address.toLowerCase().includes(q));
+    return matchesRole && matchesSearch;
+  });
 
   // Product Delete
   const handleDeleteProduct = async (id: string, name: string) => {
@@ -685,7 +825,14 @@ export const AdminDashboardPage: React.FC = () => {
                     .map((prod) => (
                       <tr key={prod._id} className="hover:bg-[#FAF8F5]">
                         <td className="p-3">
-                          <img src={prod.images[0]} alt="" className="w-12 h-12 rounded-lg object-cover bg-gray-100" />
+                          <img
+                            src={prod.images?.[0] || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=300&q=80'}
+                            alt=""
+                            className="w-12 h-12 rounded-lg object-cover bg-gray-100"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=300&q=80';
+                            }}
+                          />
                         </td>
                         <td className="p-3 font-mono font-bold text-[#0B192C]">{prod.sku}</td>
                         <td className="p-3 font-semibold max-w-xs truncate">{prod.name}</td>
@@ -816,7 +963,14 @@ export const AdminDashboardPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {categories.map((cat) => (
                 <div key={cat._id} className="p-4 rounded-2xl border border-gray-200 bg-[#FAF8F5] space-y-3">
-                  <img src={cat.image} alt="" className="w-full h-32 object-cover rounded-xl" />
+                  <img
+                    src={cat.image || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'}
+                    alt={cat.name}
+                    className="w-full h-32 object-cover rounded-xl bg-gray-100"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80';
+                    }}
+                  />
                   <div>
                     <h4 className="font-bold text-sm text-[#0B192C]">{cat.name}</h4>
                     <p className="text-xs text-gray-500 mt-1">{cat.description}</p>
@@ -828,49 +982,231 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
         )}
 
-        {/* Tab 5: Users */}
+        {/* Tab 5: Users / Customer Management */}
         {activeTab === 'users' && (
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-[#E8E2D5] space-y-6">
-            <h3 className="text-base font-bold font-serif text-[#0B192C] uppercase tracking-wider">
-              Danh Sách Khách Hàng & Quản Trị Viên ({users.length})
-            </h3>
+          <div className="space-y-6">
+            {/* Top Stat Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-white rounded-2xl p-5 border border-[#E8E2D5] shadow-xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[#0B192C]/5 text-[#0B192C] flex items-center justify-center font-bold">
+                  <Users className="w-6 h-6 text-[#997A15]" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold font-serif text-[#0B192C]">{users.length}</div>
+                  <div className="text-xs text-gray-500 font-medium">Tổng Tài Khoản Khách Hàng</div>
+                </div>
+              </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-[#FAF8F5] text-gray-700 uppercase font-bold border-b border-gray-200">
-                  <tr>
-                    <th className="p-3">Họ Tên</th>
-                    <th className="p-3">Email</th>
-                    <th className="p-3">Số Điện Thoại</th>
-                    <th className="p-3">Vai Trò</th>
-                    <th className="p-3 text-right">Phân Quyền</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {users.map((u) => (
-                    <tr key={u._id} className="hover:bg-[#FAF8F5]">
-                      <td className="p-3 font-bold text-gray-900">{u.name}</td>
-                      <td className="p-3 font-mono">{u.email}</td>
-                      <td className="p-3 text-gray-600">{u.phone || 'Chưa cập nhật'}</td>
-                      <td className="p-3">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
-                          u.role === 'admin' ? 'bg-[#0B192C] text-[#F4E8C1]' : 'bg-gray-100 text-gray-700'
-                        }`}>
-                          {u.role === 'admin' ? 'Quản Trị Viên' : 'Khách Hàng'}
-                        </span>
-                      </td>
-                      <td className="p-3 text-right">
-                        <button
-                          onClick={() => handleUserRoleToggle(u)}
-                          className="px-3 py-1.5 bg-[#FAF8F5] border border-gray-300 hover:border-[#D4AF37] rounded-lg text-xs font-semibold transition-colors"
-                        >
-                          Chuyển sang {u.role === 'admin' ? 'Khách Hàng' : 'Quản Trị Viên'}
-                        </button>
-                      </td>
+              <div className="bg-white rounded-2xl p-5 border border-[#E8E2D5] shadow-xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-amber-50 text-[#997A15] flex items-center justify-center font-bold">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold font-serif text-[#997A15]">
+                    {users.filter((u) => u.role === 'customer').length}
+                  </div>
+                  <div className="text-xs text-gray-500 font-medium">Khách Hàng VIP & Bán Lẻ</div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-5 border border-[#E8E2D5] shadow-xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-800 flex items-center justify-center font-bold">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold font-serif text-[#0B192C]">
+                    {users.filter((u) => u.role === 'admin').length}
+                  </div>
+                  <div className="text-xs text-gray-500 font-medium">Quản Trị Viên & Điều Hành</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Card */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-[#E8E2D5] space-y-6">
+              {/* Toolbar: Search, Filter, Add Customer Button */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-100">
+                <div>
+                  <h3 className="text-base font-bold font-serif text-[#0B192C] uppercase tracking-wider flex items-center gap-2">
+                    <Users className="w-5 h-5 text-[#997A15]" />
+                    <span>Quản Lý Hồ Sơ Khách Hàng ({filteredUsers.length} / {users.length})</span>
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Tra cứu, cập nhật thông tin cá nhân và theo dõi lịch sử giao dịch mua sắm
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Search input */}
+                  <div className="relative min-w-[240px] sm:min-w-[280px]">
+                    <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Tìm tên, email, SĐT, địa chỉ..."
+                      value={customerSearchTerm}
+                      onChange={(e) => setCustomerSearchTerm(e.target.value)}
+                      className="w-full pl-9 pr-8 py-2 bg-[#FAF8F5] border border-gray-300 rounded-xl text-xs focus:outline-none focus:border-[#D4AF37]"
+                    />
+                    {customerSearchTerm && (
+                      <button
+                        onClick={() => setCustomerSearchTerm('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Role filter */}
+                  <select
+                    value={customerRoleFilter}
+                    onChange={(e) => setCustomerRoleFilter(e.target.value as any)}
+                    className="p-2 bg-[#FAF8F5] border border-gray-300 rounded-xl text-xs font-medium focus:outline-none focus:border-[#D4AF37]"
+                  >
+                    <option value="all">Tất Cả Vai Trò</option>
+                    <option value="customer">Khách Hàng</option>
+                    <option value="admin">Quản Trị Viên</option>
+                  </select>
+
+                  {/* Add Customer Button */}
+                  <button
+                    onClick={handleOpenCreateCustomer}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-[#0B192C] text-[#F4E8C1] hover:bg-[#1E3E62] rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-4 h-4 text-[#D4AF37]" />
+                    <span>Thêm Khách Hàng</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-[#FAF8F5] text-gray-700 uppercase font-bold border-b border-gray-200">
+                    <tr>
+                      <th className="p-3">Khách Hàng</th>
+                      <th className="p-3">Thông Tin Liên Hệ</th>
+                      <th className="p-3">Địa Chỉ Giao Hàng</th>
+                      <th className="p-3 text-center">Đơn Đã Mua</th>
+                      <th className="p-3 text-right">Tổng Chi Tiêu</th>
+                      <th className="p-3">Vai Trò</th>
+                      <th className="p-3 text-center">Thao Tác</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center text-gray-400">
+                          <Users className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p>Không tìm thấy khách hàng nào phù hợp với điều kiện tìm kiếm.</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredUsers.map((u) => {
+                        const customerOrders = getCustomerOrders(u);
+                        const totalSpent = getCustomerTotalSpent(u);
+                        return (
+                          <tr key={u._id} className="hover:bg-[#FAF8F5] transition-colors">
+                            <td className="p-3">
+                              <div className="flex items-center gap-3">
+                                <img
+                                  src={u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}
+                                  alt={u.name}
+                                  className="w-10 h-10 rounded-full object-cover border border-[#D4AF37]/30 shrink-0 bg-gray-100"
+                                  onError={(ev) => {
+                                    (ev.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80';
+                                  }}
+                                />
+                                <div>
+                                  <div className="font-bold text-gray-900 flex items-center gap-1.5">
+                                    <span>{u.name}</span>
+                                    {u.role === 'admin' && (
+                                      <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" title="Quản Trị Viên" />
+                                    )}
+                                  </div>
+                                  <span className="text-[10px] font-mono text-gray-400">ID: {u._id}</span>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="p-3">
+                              <div className="font-mono text-gray-800 font-semibold">{u.email}</div>
+                              <div className="text-gray-500 text-[11px] flex items-center gap-1 mt-0.5">
+                                <Phone className="w-3 h-3 text-gray-400" />
+                                <span>{u.phone || 'Chưa có SĐT'}</span>
+                              </div>
+                            </td>
+
+                            <td className="p-3 max-w-xs">
+                              <div className="text-gray-600 text-[11px] truncate flex items-start gap-1" title={u.address || 'Chưa cập nhật'}>
+                                <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
+                                <span className="truncate">{u.address || 'Chưa cập nhật'}</span>
+                              </div>
+                            </td>
+
+                            <td className="p-3 text-center">
+                              <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full font-bold text-[11px] ${
+                                customerOrders.length > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-400'
+                              }`}>
+                                {customerOrders.length} đơn
+                              </span>
+                            </td>
+
+                            <td className="p-3 text-right font-mono font-bold text-[#997A15]">
+                              {totalSpent > 0 ? formatCurrency(totalSpent) : '0 ₫'}
+                            </td>
+
+                            <td className="p-3">
+                              <button
+                                onClick={() => handleUserRoleToggle(u)}
+                                title="Bấm để chuyển đổi vai trò"
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase transition-transform hover:scale-105 cursor-pointer ${
+                                  u.role === 'admin' ? 'bg-[#0B192C] text-[#F4E8C1]' : 'bg-amber-100 text-amber-900 border border-amber-200'
+                                }`}
+                              >
+                                {u.role === 'admin' ? 'Admin' : 'Khách Hàng VIP'}
+                              </button>
+                            </td>
+
+                            <td className="p-3 text-center">
+                              <div className="flex items-center justify-center gap-1.5">
+                                {/* Xem Chi Tiết */}
+                                <button
+                                  onClick={() => handleViewCustomerDetail(u)}
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                  title="Xem chi tiết hồ sơ & lịch sử mua hàng"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+
+                                {/* Chỉnh sửa */}
+                                <button
+                                  onClick={() => handleOpenEditCustomer(u)}
+                                  className="p-1.5 text-[#997A15] hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                                  title="Cập nhật thông tin khách hàng"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+
+                                {/* Xóa */}
+                                {u.email !== 'admin@3ae.vn' && u._id !== 'usr-admin' && (
+                                  <button
+                                    onClick={() => handleDeleteCustomer(u)}
+                                    className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Xóa khách hàng"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -1055,6 +1391,44 @@ export const AdminDashboardPage: React.FC = () => {
                     className="w-full p-2.5 bg-[#FAF8F5] border border-gray-300 rounded-xl"
                   />
                 </div>
+
+                <div className="sm:col-span-2 space-y-1.5 pt-2 border-t border-gray-100">
+                  <label className="font-bold text-gray-700 block">
+                    Link hình ảnh sản phẩm (Phân cách bằng dấu phẩy hoặc xuống dòng)
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="https://images.unsplash.com/...&#10;https://images.unsplash.com/..."
+                    value={editingProduct.images?.join('\n') || ''}
+                    onChange={(e) => {
+                      const urls = e.target.value.split(/[\n,]+/).map((u) => u.trim()).filter(Boolean);
+                      setEditingProduct({ ...editingProduct, images: urls });
+                    }}
+                    className="w-full p-2.5 bg-[#FAF8F5] border border-gray-300 rounded-xl font-mono text-[11px] placeholder-gray-400"
+                  />
+                  <p className="text-[10px] text-gray-500">
+                    💡 Khuyên dùng link ảnh chất lượng cao từ Unsplash hoặc link ảnh trực tiếp có đuôi .jpg / .png / .webp
+                  </p>
+                  {editingProduct.images && editingProduct.images.length > 0 && (
+                    <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+                      {editingProduct.images.map((img, idx) => (
+                        <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 shrink-0 bg-gray-50 shadow-xs">
+                          <img
+                            src={img}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onError={(ev) => {
+                              (ev.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=300&q=80';
+                            }}
+                          />
+                          <span className="absolute bottom-0 inset-x-0 bg-black/70 text-[9px] text-center text-white font-mono">
+                            Ảnh {idx + 1}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="pt-4 border-t border-gray-200 flex justify-end gap-3">
@@ -1141,6 +1515,342 @@ export const AdminDashboardPage: React.FC = () => {
                   className="px-5 py-2 bg-[#0B192C] text-[#F4E8C1] font-bold rounded-xl"
                 >
                   Tạo Mã
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Customer Detail Modal */}
+      {customerDetailModalOpen && selectedCustomer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden border border-[#E8E2D5] flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="bg-[#0B192C] text-[#F4E8C1] px-6 py-5 flex items-center justify-between border-b border-[#D4AF37]/30">
+              <div className="flex items-center gap-3.5">
+                <img
+                  src={selectedCustomer.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
+                  alt={selectedCustomer.name}
+                  className="w-12 h-12 rounded-full object-cover border-2 border-[#D4AF37] bg-white/10 shrink-0"
+                  onError={(ev) => {
+                    (ev.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
+                  }}
+                />
+                <div>
+                  <h3 className="text-base font-bold font-serif flex items-center gap-2">
+                    <span>{selectedCustomer.name}</span>
+                    <span className={`text-[10px] px-2.5 py-0.5 rounded-full uppercase font-sans font-bold tracking-wider ${
+                      selectedCustomer.role === 'admin' ? 'bg-[#D4AF37] text-[#0B192C]' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                    }`}>
+                      {selectedCustomer.role === 'admin' ? 'Quản Trị Viên' : 'Khách Hàng VIP'}
+                    </span>
+                  </h3>
+                  <p className="text-xs text-gray-300 font-mono mt-0.5">Mã tài khoản: {selectedCustomer._id}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setCustomerDetailModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-6 text-xs text-gray-700">
+              {/* Profile Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-gray-200 space-y-3">
+                  <h4 className="font-bold font-serif text-[#0B192C] text-sm uppercase tracking-wider flex items-center gap-2 border-b border-gray-200 pb-2">
+                    <UserCheck className="w-4 h-4 text-[#997A15]" />
+                    <span>Hồ Sơ Định Danh Khách Hàng</span>
+                  </h4>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Email:</span>
+                      <span className="font-bold text-gray-900 font-mono">{selectedCustomer.email}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Số Điện Thoại:</span>
+                      <span className="font-bold text-gray-900 font-mono">{selectedCustomer.phone || 'Chưa cập nhật'}</span>
+                    </div>
+                    <div className="flex justify-between items-start">
+                      <span className="text-gray-500 shrink-0">Địa Chỉ:</span>
+                      <span className="font-semibold text-gray-800 text-right pl-4">{selectedCustomer.address || 'Chưa cập nhật'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Vai Trò:</span>
+                      <span className="font-bold text-[#997A15] uppercase">{selectedCustomer.role === 'admin' ? 'Quản Trị Viên' : 'Khách Hàng VIP'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Xác thực SĐT:</span>
+                      <span className="text-emerald-700 font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Đã xác minh OTP</span>
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Ngày tạo:</span>
+                      <span className="text-gray-600">{selectedCustomer.createdAt ? formatDate(selectedCustomer.createdAt) : '2026-01-15'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Purchase Summary */}
+                <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-gray-200 space-y-3 flex flex-col justify-between">
+                  <div>
+                    <h4 className="font-bold font-serif text-[#0B192C] text-sm uppercase tracking-wider flex items-center gap-2 border-b border-gray-200 pb-2">
+                      <ShoppingBag className="w-4 h-4 text-[#997A15]" />
+                      <span>Thống Kê Chi Tiêu & Giao Dịch</span>
+                    </h4>
+
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <div className="bg-white p-3 rounded-xl border border-gray-200 text-center">
+                        <div className="text-2xl font-bold font-serif text-[#0B192C]">
+                          {getCustomerOrders(selectedCustomer).length}
+                        </div>
+                        <div className="text-[11px] text-gray-500 mt-0.5">Tổng Đơn Đã Đặt</div>
+                      </div>
+
+                      <div className="bg-white p-3 rounded-xl border border-gray-200 text-center">
+                        <div className="text-base sm:text-lg font-bold font-serif text-[#997A15] font-mono">
+                          {formatCurrency(getCustomerTotalSpent(selectedCustomer))}
+                        </div>
+                        <div className="text-[11px] text-gray-500 mt-0.5">Tổng Đã Chi Tiêu</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-amber-50/80 border border-amber-200/80 rounded-xl text-[11px] text-amber-900 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#997A15] shrink-0" />
+                    <span>Hạng thẻ: <strong>Hội Viên Kim Cương VIP</strong> (Được hưởng ưu đãi bảo dưỡng và quà tặng sinh nhật).</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order History Table */}
+              <div className="space-y-3">
+                <h4 className="font-bold font-serif text-[#0B192C] text-sm uppercase tracking-wider">
+                  Lịch Sử Các Đơn Hàng Gần Nhất ({getCustomerOrders(selectedCustomer).length})
+                </h4>
+
+                {getCustomerOrders(selectedCustomer).length === 0 ? (
+                  <div className="p-6 text-center bg-[#FAF8F5] rounded-2xl border border-gray-200 text-gray-400">
+                    <ShoppingBag className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <p>Khách hàng này hiện chưa thực hiện giao dịch đơn hàng nào.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-2xl border border-gray-200">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-[#FAF8F5] text-gray-700 uppercase font-bold border-b border-gray-200">
+                        <tr>
+                          <th className="p-2.5">Mã Đơn</th>
+                          <th className="p-2.5">Sản Phẩm</th>
+                          <th className="p-2.5 text-right">Tổng Tiền</th>
+                          <th className="p-2.5">Trạng Thái</th>
+                          <th className="p-2.5">Ngày Đặt</th>
+                          <th className="p-2.5 text-center">Hóa Đơn</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 bg-white">
+                        {getCustomerOrders(selectedCustomer).map((ord) => (
+                          <tr key={ord._id} className="hover:bg-gray-50">
+                            <td className="p-2.5 font-mono font-bold text-[#0B192C]">{ord.orderCode}</td>
+                            <td className="p-2.5 text-gray-600 max-w-xs truncate">
+                              {(ord.items || []).map((i) => i.productName).join(', ')}
+                            </td>
+                            <td className="p-2.5 text-right font-bold text-[#997A15] font-mono">
+                              {formatCurrency(ord.total)}
+                            </td>
+                            <td className="p-2.5">
+                              <span className="px-2 py-0.5 bg-gray-100 rounded text-[10px] font-bold text-gray-700">
+                                {ord.orderStatus}
+                              </span>
+                            </td>
+                            <td className="p-2.5 text-gray-500">{formatDate(ord.createdAt)}</td>
+                            <td className="p-2.5 text-center">
+                              <button
+                                onClick={() => {
+                                  setCustomerDetailModalOpen(false);
+                                  setInvoiceOrder(ord);
+                                }}
+                                className="p-1 hover:text-[#D4AF37] font-semibold text-[11px] underline cursor-pointer"
+                              >
+                                Xem Hóa Đơn
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-[#FAF8F5] px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+              <button
+                onClick={() => {
+                  setCustomerDetailModalOpen(false);
+                  handleOpenEditCustomer(selectedCustomer);
+                }}
+                className="px-4 py-2 bg-white border border-[#D4AF37] text-[#997A15] font-bold rounded-xl hover:bg-[#FAF8F5] flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Edit className="w-4 h-4" />
+                <span>Chỉnh Sửa Hồ Sơ</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCustomerDetailModalOpen(false)}
+                className="px-5 py-2 bg-[#0B192C] text-[#F4E8C1] font-bold rounded-xl hover:bg-[#1E3E62] transition-colors cursor-pointer"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Customer Form Modal (Create / Edit) */}
+      {customerModalOpen && editingCustomer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto border border-[#E8E2D5]">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+              <h3 className="text-base font-bold font-serif text-[#0B192C] uppercase tracking-wider flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#997A15]" />
+                <span>{editingCustomer._id ? 'Cập Nhật Thông Tin Khách Hàng' : 'Thêm Khách Hàng Mới'}</span>
+              </h3>
+              <button
+                onClick={() => setCustomerModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCustomer} className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Name */}
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="font-bold text-gray-700 block">Họ và Tên *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ví dụ: Nguyễn Văn An"
+                    value={editingCustomer.name || ''}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, name: e.target.value })}
+                    className="w-full p-2.5 bg-[#FAF8F5] border border-gray-300 rounded-xl focus:outline-none focus:border-[#D4AF37]"
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="space-y-1">
+                  <label className="font-bold text-gray-700 block">Email *</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="example@gmail.com"
+                    value={editingCustomer.email || ''}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, email: e.target.value })}
+                    className="w-full p-2.5 bg-[#FAF8F5] border border-gray-300 rounded-xl font-mono focus:outline-none focus:border-[#D4AF37]"
+                  />
+                </div>
+
+                {/* Phone */}
+                <div className="space-y-1">
+                  <label className="font-bold text-gray-700 block">Số Điện Thoại *</label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="0988776655"
+                    value={editingCustomer.phone || ''}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, phone: e.target.value })}
+                    className="w-full p-2.5 bg-[#FAF8F5] border border-gray-300 rounded-xl font-mono focus:outline-none focus:border-[#D4AF37]"
+                  />
+                </div>
+
+                {/* Role */}
+                <div className="space-y-1">
+                  <label className="font-bold text-gray-700 block">Phân Quyền Vai Trò</label>
+                  <select
+                    value={editingCustomer.role || 'customer'}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, role: e.target.value as any })}
+                    className="w-full p-2.5 bg-[#FAF8F5] border border-gray-300 rounded-xl font-semibold focus:outline-none focus:border-[#D4AF37]"
+                  >
+                    <option value="customer">Khách Hàng VIP</option>
+                    <option value="admin">Quản Trị Viên (Admin)</option>
+                  </select>
+                </div>
+
+                {/* Password */}
+                <div className="space-y-1">
+                  <label className="font-bold text-gray-700 block">
+                    {editingCustomer._id ? 'Mật Khẩu Mới (Để trống nếu không đổi)' : 'Mật Khẩu *'}
+                  </label>
+                  <input
+                    type="text"
+                    required={!editingCustomer._id}
+                    placeholder={editingCustomer._id ? '••••••••' : 'Customer@123'}
+                    value={editingCustomer.password || ''}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, password: e.target.value })}
+                    className="w-full p-2.5 bg-[#FAF8F5] border border-gray-300 rounded-xl font-mono focus:outline-none focus:border-[#D4AF37]"
+                  />
+                </div>
+
+                {/* Address */}
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="font-bold text-gray-700 block">Địa Chỉ Giao Hàng</label>
+                  <input
+                    type="text"
+                    placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố"
+                    value={editingCustomer.address || ''}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, address: e.target.value })}
+                    className="w-full p-2.5 bg-[#FAF8F5] border border-gray-300 rounded-xl focus:outline-none focus:border-[#D4AF37]"
+                  />
+                </div>
+
+                {/* Avatar URL */}
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="font-bold text-gray-700 block">Link Ảnh Đại Diện (Avatar URL)</label>
+                  <div className="flex gap-3 items-center">
+                    <img
+                      src={editingCustomer.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}
+                      alt="Preview"
+                      className="w-10 h-10 rounded-full object-cover border border-gray-300 shrink-0 bg-gray-100"
+                      onError={(ev) => {
+                        (ev.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80';
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="https://images.unsplash.com/photo-..."
+                      value={editingCustomer.avatar || ''}
+                      onChange={(e) => setEditingCustomer({ ...editingCustomer, avatar: e.target.value })}
+                      className="w-full p-2.5 bg-[#FAF8F5] border border-gray-300 rounded-xl font-mono text-[11px] focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-4 border-t border-gray-200 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCustomerModalOpen(false)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-[#0B192C] text-[#F4E8C1] font-bold rounded-xl hover:bg-[#1E3E62] transition-colors cursor-pointer"
+                >
+                  {editingCustomer._id ? 'Lưu Thay Đổi' : 'Tạo Khách Hàng'}
                 </button>
               </div>
             </form>

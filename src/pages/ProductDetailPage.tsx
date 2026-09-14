@@ -165,9 +165,12 @@ export const ProductDetailPage: React.FC = () => {
             {/* Main Stage Image with Zoom & Badges */}
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#FAF8F5] border border-[#EAE5DC] group">
               <img
-                src={product.images[selectedImage] || product.images[0]}
+                src={product.images?.[selectedImage] || product.images?.[0] || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1000&q=80'}
                 alt={product.name}
                 className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 cursor-zoom-in"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1000&q=80';
+                }}
               />
 
               {/* Discount / Best Seller Badges */}
@@ -209,7 +212,7 @@ export const ProductDetailPage: React.FC = () => {
             </div>
 
             {/* Thumbnail Carousel */}
-            {product.images.length > 1 && (
+            {product.images?.length > 1 && (
               <div className="flex gap-3 overflow-x-auto pb-2">
                 {product.images.map((img, idx) => (
                   <button
@@ -221,7 +224,14 @@ export const ProductDetailPage: React.FC = () => {
                         : 'border-gray-200 opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img
+                      src={img}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=300&q=80';
+                      }}
+                    />
                   </button>
                 ))}
               </div>

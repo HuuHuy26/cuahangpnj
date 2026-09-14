@@ -8,6 +8,7 @@ import { Order } from './models/Order.js';
 import { User } from './models/User.js';
 import { Coupon } from './models/Coupon.js';
 import { Otp } from './models/Otp.js';
+import { Store } from './models/Store.js';
 
 dotenv.config();
 
@@ -58,6 +59,7 @@ app.get('/', (req, res) => {
           <a class="link-item" href="/api/health" target="_blank">📡 GET /api/health (Kiểm tra kết nối)</a>
           <a class="link-item" href="/api/products" target="_blank">💎 GET /api/products (Danh sách Kim cương & Trang sức)</a>
           <a class="link-item" href="/api/categories" target="_blank">📦 GET /api/categories (Danh mục trang sức)</a>
+          <a class="link-item" href="/api/stores" target="_blank">🏬 GET /api/stores (Hệ thống Showroom Cửa hàng)</a>
           <a class="link-item" href="/api/orders" target="_blank">🛍️ GET /api/orders (Danh sách đơn hàng)</a>
           <a class="link-item" href="/api/coupons" target="_blank">🏷️ GET /api/coupons (Mã voucher giảm giá)</a>
         </div>
@@ -159,6 +161,40 @@ app.post('/api/categories', async (req, res) => {
     const category = new Category({ ...req.body, _id: newId });
     await category.save();
     res.status(201).json({ success: true, data: category });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ==================== STORES & SHOWROOMS ====================
+app.get('/api/stores', async (req, res) => {
+  try {
+    const stores = await Store.find();
+    res.json({ success: true, count: stores.length, data: stores });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.get('/api/stores/:idOrCode', async (req, res) => {
+  try {
+    const { idOrCode } = req.params;
+    const store = await Store.findOne({
+      $or: [{ _id: idOrCode }, { code: idOrCode }]
+    });
+    if (!store) return res.status(404).json({ success: false, message: 'Không tìm thấy showroom cửa hàng' });
+    res.json({ success: true, data: store });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/stores', async (req, res) => {
+  try {
+    const newId = req.body._id || 'store-' + Date.now();
+    const store = new Store({ ...req.body, _id: newId });
+    await store.save();
+    res.status(201).json({ success: true, message: 'Thêm showroom cửa hàng thành công', data: store });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -470,11 +506,65 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// ==================== USERS ====================
+// ==================== USERS & CUSTOMERS ====================
 app.get('/api/users', async (req, res) => {
   try {
-    const users = await User.find();
-    res.json({ success: true, data: users });
+    const { search, role } = req.query;
+    const filter = {};
+    if (role && role !== 'all') filter.role = role;
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } }
+      ];
+    }
+    const users = await User.find(filter).sort({ createdAt: -1 });
+    res.json({ success: true, count: users.length, data: users });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
+    res.json({ success: true, data: user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/users', async (req, res) => {
+  try {
+    const { name, email, phone, password, address, role, avatar } = req.body;
+    if (!name || !email) {
+      return res.status(400).json({ success: false, message: 'Vui lòng cung cấp Họ tên và Email!' });
+    }
+
+    const existing = await User.findOne({ 
+      $or: [{ email: email.toLowerCase() }, ...(phone ? [{ phone }] : [])] 
+    });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'Email hoặc Số điện thoại này đã tồn tại trong hệ thống!' });
+    }
+
+    const newId = req.body._id || 'usr-' + Date.now();
+    const newUser = new User({
+      _id: newId,
+      name,
+      email: email.toLowerCase(),
+      phone: phone || '',
+      password: password || 'Customer@123',
+      address: address || '',
+      role: role || 'customer',
+      avatar: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      isPhoneVerified: true
+    });
+
+    await newUser.save();
+    res.status(201).json({ success: true, message: 'Thêm người dùng thành công', data: newUser });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -482,9 +572,28 @@ app.get('/api/users', async (req, res) => {
 
 app.put('/api/users/:id', async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updateData = { ...req.body };
+    if (updateData.email) updateData.email = updateData.email.toLowerCase();
+    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!user) return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
-    res.json({ success: true, message: 'Cập nhật thành công', data: user });
+    res.json({ success: true, message: 'Cập nhật thông tin thành công', data: user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/users/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
+
+    // Bảo vệ tài khoản quản trị viên chính
+    if (user.email === 'admin@3ae.vn' || user._id === 'usr-admin') {
+      return res.status(403).json({ success: false, message: 'Không thể xóa tài khoản Quản Trị Viên gốc của hệ thống!' });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Đã xóa người dùng thành công' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

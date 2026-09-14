@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       showToast('Đăng ký tài khoản thành viên thành công!', 'success');
       return true;
     } catch (err: any) {
-      showToast(err.message || 'Đăng ký thất bại', 'error');
+      showToast(err.message || 'Đăng ký tài khoản thành viên thất bại', 'error');
       return false;
     }
   };
@@ -87,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       showToast('Cập nhật hồ sơ thành công!', 'success');
       return true;
     } catch (err: any) {
-      showToast(err.message || 'Cập nhật thất bại', 'error');
+      showToast(err.message || 'Cập nhật hồ sơ thất bại', 'error');
       return false;
     }
   };
