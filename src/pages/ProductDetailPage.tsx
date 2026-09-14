@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  Heart, 
-  ShoppingBag, 
-  Share2, 
-  ShieldCheck, 
-  Truck, 
-  RotateCcw, 
-  Sparkles, 
-  Star, 
-  Diamond, 
-  Ruler, 
-  Award, 
-  Check, 
+import {
+  Heart,
+  ShoppingBag,
+  Share2,
+  ShieldCheck,
+  Truck,
+  RotateCcw,
+  Sparkles,
+  Star,
+  Diamond,
+  Ruler,
+  Award,
+  Check,
   FileText,
   MessageSquare,
   Send,
@@ -145,7 +145,7 @@ export const ProductDetailPage: React.FC = () => {
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        
+
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-xs text-gray-500">
           <Link to="/" className="hover:text-[#997A15]">Trang Chủ</Link>
@@ -159,7 +159,7 @@ export const ProductDetailPage: React.FC = () => {
 
         {/* Top Product Hero Grid */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-10 shadow-sm border border-[#E8E2D5] grid grid-cols-1 lg:grid-cols-12 gap-10">
-          
+
           {/* Gallery - Left (5 cols) */}
           <div className="lg:col-span-6 space-y-4">
             {/* Main Stage Image with Zoom & Badges */}
@@ -193,9 +193,8 @@ export const ProductDetailPage: React.FC = () => {
                 <button
                   id="btn-detail-wishlist"
                   onClick={() => toggleFavorite(product)}
-                  className={`p-2.5 rounded-full backdrop-blur-md transition-all shadow-md ${
-                    favorite ? 'bg-red-50 text-red-600' : 'bg-white/80 text-gray-700 hover:text-red-500'
-                  }`}
+                  className={`p-2.5 rounded-full backdrop-blur-md transition-all shadow-md ${favorite ? 'bg-red-50 text-red-600' : 'bg-white/80 text-gray-700 hover:text-red-500'
+                    }`}
                   title="Yêu thích"
                 >
                   <Heart className={`w-5 h-5 ${favorite ? 'fill-current' : ''}`} />
@@ -218,11 +217,10 @@ export const ProductDetailPage: React.FC = () => {
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`w-20 h-20 shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
-                      selectedImage === idx
+                    className={`w-20 h-20 shrink-0 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === idx
                         ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
                         : 'border-gray-200 opacity-60 hover:opacity-100'
-                    }`}
+                      }`}
                   >
                     <img
                       src={img}
@@ -241,7 +239,7 @@ export const ProductDetailPage: React.FC = () => {
           {/* Product Purchase Actions - Right (7 cols) */}
           <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
-              
+
               {/* Category & SKU */}
               <div className="flex items-center justify-between text-xs text-gray-500">
                 <span className="font-semibold uppercase tracking-wider text-[#997A15]">
@@ -379,11 +377,10 @@ export const ProductDetailPage: React.FC = () => {
                       <button
                         key={s}
                         onClick={() => setSelectedSize(s)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all ${
-                          selectedSize === s
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all ${selectedSize === s
                             ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C] shadow-sm'
                             : 'bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37]'
-                        }`}
+                          }`}
                       >
                         {s}
                       </button>
@@ -457,7 +454,7 @@ export const ProductDetailPage: React.FC = () => {
 
         {/* Detailed Tabs (Mô Tả, Thông Số, Chính Sách, Đánh Giá) */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-[#E8E2D5]">
-          
+
           {/* Tab Navigation */}
           <div className="flex border-b border-gray-200 gap-6 overflow-x-auto">
             {[
@@ -469,11 +466,10 @@ export const ProductDetailPage: React.FC = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
-                className={`pb-4 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap ${
-                  activeTab === tab.key
+                className={`pb-4 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap ${activeTab === tab.key
                     ? 'text-[#0B192C] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#D4AF37]'
                     : 'text-gray-400 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -587,7 +583,7 @@ export const ProductDetailPage: React.FC = () => {
           {/* Tab 4: Reviews */}
           {activeTab === 'reviews' && (
             <div className="py-6 space-y-8">
-              
+
               {/* Review Submit Form */}
               <div className="p-6 bg-[#FAF8F5] rounded-2xl border border-[#E8E2D5]">
                 <h4 className="text-sm font-bold text-[#0B192C] uppercase tracking-wider mb-4 flex items-center gap-2">

@@ -44,7 +44,7 @@ export const HomePage: React.FC = () => {
       {/* 3. Best Sellers Showcase */}
       <section className="py-16 bg-white border-b border-[#E5E2D9]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="flex justify-between items-end mb-10">
             <div>
               <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Tuyệt tác yêu thích</p>
@@ -79,7 +79,7 @@ export const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative overflow-hidden shadow-xl bg-[#003366] border-2 border-[#C5A059]">
             <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
-              
+
               {/* Text Side */}
               <div className="p-8 sm:p-12 lg:p-16 text-white space-y-6">
                 <span className="inline-block text-[11px] font-bold uppercase tracking-[0.3em] text-[#C5A059] italic">

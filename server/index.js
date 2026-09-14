@@ -495,6 +495,15 @@ app.post('/api/auth/login', async (req, res) => {
       }
     }
 
+    // Kiểm tra tài khoản có bị khóa không
+    if (user.isLocked || user.status === 'locked') {
+      const reasonMsg = user.lockReason ? ` Lý do: ${user.lockReason}.` : '';
+      return res.status(403).json({
+        success: false,
+        message: `Tài khoản của quý khách hiện đang bị tạm khóa.${reasonMsg} Vui lòng liên hệ Quản trị viên để được hỗ trợ mở khóa.`
+      });
+    }
+
     const token = 'jwt_token_' + Math.random().toString(36).substring(2);
     res.json({
       success: true,
@@ -509,9 +518,17 @@ app.post('/api/auth/login', async (req, res) => {
 // ==================== USERS & CUSTOMERS ====================
 app.get('/api/users', async (req, res) => {
   try {
-    const { search, role } = req.query;
+    const { search, role, status } = req.query;
     const filter = {};
     if (role && role !== 'all') filter.role = role;
+    if (status && status !== 'all') {
+      if (status === 'locked') {
+        filter.$or = [{ status: 'locked' }, { isLocked: true }];
+      } else if (status === 'active') {
+        filter.status = 'active';
+        filter.isLocked = { $ne: true };
+      }
+    }
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -598,6 +615,60 @@ app.delete('/api/users/:id', async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
+// Mở khóa tài khoản
+const handleUnlockUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
+
+    user.status = 'active';
+    user.isLocked = false;
+    user.lockedAt = null;
+    user.lockReason = null;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `Đã mở khóa tài khoản cho ${user.name} thành công!`,
+      data: user
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+app.patch('/api/users/:id/unlock', handleUnlockUser);
+app.put('/api/users/:id/unlock', handleUnlockUser);
+
+// Khóa tài khoản
+const handleLockUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
+
+    // Bảo vệ tài khoản quản trị viên chính
+    if (user.email === 'admin@3ae.vn' || user._id === 'usr-admin') {
+      return res.status(403).json({ success: false, message: 'Không thể khóa tài khoản Quản Trị Viên gốc của hệ thống!' });
+    }
+
+    const { reason } = req.body;
+    user.status = 'locked';
+    user.isLocked = true;
+    user.lockedAt = new Date();
+    user.lockReason = reason || 'Tài khoản tạm khóa theo quyết định của Quản Trị Viên';
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `Đã khóa tài khoản của ${user.name} thành công!`,
+      data: user
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+app.patch('/api/users/:id/lock', handleLockUser);
+app.put('/api/users/:id/lock', handleLockUser);
 
 app.listen(PORT, () => {
   console.log(`🚀 3AE Jewelry Backend Server running on http://localhost:${PORT}`);

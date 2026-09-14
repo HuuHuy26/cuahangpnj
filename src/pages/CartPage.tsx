@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Trash2, 
-  ShoppingBag, 
-  ArrowRight, 
-  Tag, 
-  ShieldCheck, 
-  Truck, 
+import {
+  Trash2,
+  ShoppingBag,
+  ArrowRight,
+  Tag,
+  ShieldCheck,
+  Truck,
   RotateCcw,
   Sparkles,
   CheckCircle2,
@@ -17,18 +17,18 @@ import { formatCurrency } from '../utils/formatters';
 
 export const CartPage: React.FC = () => {
   const navigate = useNavigate();
-  const { 
-    items, 
-    removeItem, 
-    updateQuantity, 
-    clearCart, 
-    subtotal, 
-    discount, 
-    shippingFee, 
-    total, 
-    appliedCoupon, 
-    applyCoupon, 
-    removeCoupon 
+  const {
+    items,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    subtotal,
+    discount,
+    shippingFee,
+    total,
+    appliedCoupon,
+    applyCoupon,
+    removeCoupon
   } = useCart();
 
   const [couponCodeInput, setCouponCodeInput] = useState('');
@@ -72,7 +72,7 @@ export const CartPage: React.FC = () => {
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        
+
         {/* Title */}
         <div className="flex items-center justify-between">
           <div>
@@ -120,7 +120,7 @@ export const CartPage: React.FC = () => {
 
         {/* Layout Grid (Items List + Order Summary) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* Left Table / Items (8 cols) */}
           <div className="lg:col-span-8 bg-white rounded-3xl p-6 shadow-xs border border-[#E8E2D5] divide-y divide-gray-100">
             {items.map((item) => {
@@ -146,11 +146,11 @@ export const CartPage: React.FC = () => {
                     </Link>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                       <span>Chất liệu: <strong>{item.product.material}</strong></span>
-                      {item.size && (
+                      {(item.selectedSize || item.size) && (
                         <>
                           <span>•</span>
                           <span className="bg-gray-100 px-2 py-0.5 rounded text-[11px] font-semibold text-gray-800">
-                            Size: {item.size}
+                            Size: {item.selectedSize || item.size}
                           </span>
                         </>
                       )}
@@ -170,14 +170,14 @@ export const CartPage: React.FC = () => {
                   <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-3">
                     <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
                       <button
-                        onClick={() => updateQuantity(item.product._id, item.quantity - 1, item.size)}
+                        onClick={() => updateQuantity(item.product._id, item.quantity - 1, item.selectedSize || item.size)}
                         className="px-2.5 py-1 text-gray-600 hover:bg-gray-100 font-bold text-xs"
                       >
                         -
                       </button>
                       <span className="px-3 py-1 text-xs font-bold text-gray-900">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.product._id, item.quantity + 1, item.size)}
+                        onClick={() => updateQuantity(item.product._id, item.quantity + 1, item.selectedSize || item.size)}
                         className="px-2.5 py-1 text-gray-600 hover:bg-gray-100 font-bold text-xs"
                       >
                         +
@@ -190,7 +190,7 @@ export const CartPage: React.FC = () => {
                       </div>
                       <button
                         id={`btn-remove-item-${item.product._id}`}
-                        onClick={() => removeItem(item.product._id, item.size)}
+                        onClick={() => removeItem(item.product._id, item.selectedSize || item.size)}
                         className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 mt-1"
                       >
                         <Trash2 className="w-3.5 h-3.5" />

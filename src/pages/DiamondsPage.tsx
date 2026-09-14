@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Diamond, 
-  Sparkles, 
-  ShieldCheck, 
-  SlidersHorizontal, 
-  Search, 
-  Scale, 
-  Award, 
+import {
+  Diamond,
+  Sparkles,
+  ShieldCheck,
+  SlidersHorizontal,
+  Search,
+  Scale,
+  Award,
   RotateCcw,
   Check
 } from 'lucide-react';
@@ -72,7 +72,7 @@ export const DiamondsPage: React.FC = () => {
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        
+
         {/* Hero Header */}
         <div className="bg-[#0B192C] text-white rounded-3xl p-8 sm:p-12 border border-[#D4AF37]/40 shadow-2xl relative overflow-hidden">
           <div className="max-w-2xl space-y-4 relative z-10">
@@ -126,11 +126,10 @@ export const DiamondsPage: React.FC = () => {
                   <button
                     key={s}
                     onClick={() => setSelectedShape(selectedShape === s ? '' : s)}
-                    className={`py-1.5 px-2 rounded-lg border text-center font-medium transition-all ${
-                      selectedShape === s
-                        ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C]'
-                        : 'bg-[#FAF8F5] text-gray-700 border-gray-200 hover:border-[#D4AF37]'
-                    }`}
+                    className={`py-1.5 px-2 rounded-lg border text-center font-medium transition-all ${selectedShape === s
+                      ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C]'
+                      : 'bg-[#FAF8F5] text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                      }`}
                   >
                     {s}
                   </button>
@@ -162,11 +161,10 @@ export const DiamondsPage: React.FC = () => {
                   <button
                     key={c}
                     onClick={() => setSelectedColor(selectedColor === c ? '' : c)}
-                    className={`w-9 h-8 rounded-lg border text-xs font-bold transition-all ${
-                      selectedColor === c
-                        ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C]'
-                        : 'bg-[#FAF8F5] text-gray-700 border-gray-200 hover:border-[#D4AF37]'
-                    }`}
+                    className={`w-9 h-8 rounded-lg border text-xs font-bold transition-all ${selectedColor === c
+                      ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C]'
+                      : 'bg-[#FAF8F5] text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                      }`}
                   >
                     {c}
                   </button>
@@ -182,11 +180,10 @@ export const DiamondsPage: React.FC = () => {
                   <button
                     key={cl}
                     onClick={() => setSelectedClarity(selectedClarity === cl ? '' : cl)}
-                    className={`py-1.5 text-[11px] rounded-lg border text-center font-semibold transition-all ${
-                      selectedClarity === cl
-                        ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C]'
-                        : 'bg-[#FAF8F5] text-gray-700 border-gray-200 hover:border-[#D4AF37]'
-                    }`}
+                    className={`py-1.5 text-[11px] rounded-lg border text-center font-semibold transition-all ${selectedClarity === cl
+                      ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C]'
+                      : 'bg-[#FAF8F5] text-gray-700 border-gray-200 hover:border-[#D4AF37]'
+                      }`}
                   >
                     {cl}
                   </button>

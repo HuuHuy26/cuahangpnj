@@ -105,6 +105,10 @@ CREATE TABLE `users` (
   `address` VARCHAR(500),
   `avatar` VARCHAR(500),
   `is_phone_verified` TINYINT(1) DEFAULT 0,
+  `status` VARCHAR(20) DEFAULT 'active',
+  `is_locked` TINYINT(1) DEFAULT 0,
+  `locked_at` TIMESTAMP NULL DEFAULT NULL,
+  `lock_reason` VARCHAR(500) NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -218,9 +222,10 @@ INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `image`, `item_co
 INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `image`, `item_count`, `featured`) VALUES ('cat-6', 'Vòng & Lắc Tay Kim Cương', 'vong-lac-tay-kim-cuong', 'Vòng tay Tennis Bracelet và lắc tay đính kim cương sang trọng chuẩn mực hoàng gia.', 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=800&q=80', 5, 0);
 
 -- Chèn Users
-INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `address`, `avatar`, `is_phone_verified`) VALUES ('usr-admin', 'Quản Trị Viên 3AE', 'admin@3ae.vn', '0901234567', 'Admin@123', 'admin', 'Toà nhà 3AE Tower, 128 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', 1);
-INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `address`, `avatar`, `is_phone_verified`) VALUES ('usr-customer-1', 'Nguyễn Thuỳ Linh', 'linh.nguyen@gmail.com', '0988776655', 'Customer@123', 'customer', 'Căn hộ 1804, Vinhomes Golden River, Bến Nghé, Quận 1, TP. Hồ Chí Minh', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80', 1);
-INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `address`, `avatar`, `is_phone_verified`) VALUES ('usr-customer-2', 'Trần Hoàng Nam', 'khachhang@gmail.com', '0912345678', 'Customer@123', 'customer', 'Biệt thự B2-12, KĐT Ciputra, Tây Hồ, Hà Nội', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', 1);
+INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `address`, `avatar`, `is_phone_verified`, `status`, `is_locked`, `locked_at`, `lock_reason`) VALUES ('usr-admin', 'Quản Trị Viên 3AE', 'admin@3ae.vn', '0901234567', 'Admin@123', 'admin', 'Toà nhà 3AE Tower, 128 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', 1, 'active', 0, NULL, NULL);
+INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `address`, `avatar`, `is_phone_verified`, `status`, `is_locked`, `locked_at`, `lock_reason`) VALUES ('usr-customer-1', 'Nguyễn Thuỳ Linh', 'linh.nguyen@gmail.com', '0988776655', 'Customer@123', 'customer', 'Căn hộ 1804, Vinhomes Golden River, Bến Nghé, Quận 1, TP. Hồ Chí Minh', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80', 1, 'active', 0, NULL, NULL);
+INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `address`, `avatar`, `is_phone_verified`, `status`, `is_locked`, `locked_at`, `lock_reason`) VALUES ('usr-customer-2', 'Trần Hoàng Nam', 'khachhang@gmail.com', '0912345678', 'Customer@123', 'customer', 'Biệt thự B2-12, KĐT Ciputra, Tây Hồ, Hà Nội', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', 1, 'active', 0, NULL, NULL);
+INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `address`, `avatar`, `is_phone_verified`, `status`, `is_locked`, `locked_at`, `lock_reason`) VALUES ('usr-customer-3', 'Lê Văn Bảo', 'bao.le@gmail.com', '0933445566', 'Customer@123', 'customer', 'Tòa nhà Landmark 81, Vinhomes Central Park, Bình Thạnh, TP. Hồ Chí Minh', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80', 1, 'locked', 1, '2026-09-10 14:30:00', 'Đăng nhập sai mật khẩu quá 5 lần liên tiếp');
 
 -- Chèn Coupons
 INSERT INTO `coupons` (`id`, `code`, `discount_type`, `discount_value`, `min_order_value`, `max_discount`, `expiry_date`, `usage_limit`, `used_count`, `status`) VALUES ('coup-1', '3AE2026', 'percentage', 5, 20000000, 5000000, '2026-12-31', 100, 18, 'active');

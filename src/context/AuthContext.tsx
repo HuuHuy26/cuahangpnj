@@ -75,6 +75,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     await apiService.auth.logout();
+    window.dispatchEvent(new CustomEvent('lumiere:logout'));
+    localStorage.removeItem('lumiere_cart_items');
+    localStorage.removeItem('lumiere_cart_coupon');
+    localStorage.removeItem('lumiere_wishlist');
     setUser(null);
     showToast('Bạn đã đăng xuất tài khoản', 'info');
   };

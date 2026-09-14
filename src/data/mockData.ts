@@ -807,6 +807,8 @@ export const INITIAL_USERS: User[] = [
     role: 'admin',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
     createdAt: '2026-01-01T00:00:00Z',
+    status: 'active',
+    isLocked: false,
   },
   {
     _id: 'usr-customer-1',
@@ -817,6 +819,8 @@ export const INITIAL_USERS: User[] = [
     role: 'customer',
     avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
     createdAt: '2026-01-15T08:30:00Z',
+    status: 'active',
+    isLocked: false,
   },
   {
     _id: 'usr-customer-2',
@@ -827,6 +831,22 @@ export const INITIAL_USERS: User[] = [
     role: 'customer',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
     createdAt: '2026-01-20T10:15:00Z',
+    status: 'active',
+    isLocked: false,
+  },
+  {
+    _id: 'usr-customer-3',
+    name: 'Lê Văn Bảo',
+    email: 'bao.le@gmail.com',
+    phone: '0933445566',
+    address: 'Tòa nhà Landmark 81, Vinhomes Central Park, Bình Thạnh, TP. Hồ Chí Minh',
+    role: 'customer',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+    createdAt: '2026-02-05T11:20:00Z',
+    status: 'locked',
+    isLocked: true,
+    lockedAt: '2026-09-10T14:30:00Z',
+    lockReason: 'Đăng nhập sai mật khẩu quá 5 lần liên tiếp',
   },
 ];
 

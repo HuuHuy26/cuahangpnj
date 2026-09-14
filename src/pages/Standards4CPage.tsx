@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Sparkles, 
-  Scale, 
-  Eye, 
-  Award, 
-  ShieldCheck, 
-  Ruler, 
-  CheckCircle2, 
+import {
+  Sparkles,
+  Scale,
+  Eye,
+  Award,
+  ShieldCheck,
+  Ruler,
+  CheckCircle2,
   ArrowRight,
   Diamond
 } from 'lucide-react';
@@ -19,7 +19,7 @@ export const Standards4CPage: React.FC = () => {
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        
+
         {/* Header Hero */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-[#D4AF37]/20 border border-[#D4AF37]/50 rounded-full text-xs font-semibold text-[#997A15]">

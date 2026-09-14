@@ -1,18 +1,23 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Product } from '../types';
 import { useToast } from './ToastContext';
+import { useAuth } from './AuthContext';
 
 interface WishlistContextType {
   favorites: Product[];
   isFavorite: (productId: string) => boolean;
   toggleFavorite: (product: Product) => void;
   removeFromFavorites: (productId: string) => void;
+  clearWishlist: () => void;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 const WISHLIST_KEY = 'lumiere_wishlist';
 
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const prevUserIdRef = useRef<string | undefined>(user?._id);
+
   const [favorites, setFavorites] = useState<Product[]>(() => {
     try {
       const saved = localStorage.getItem(WISHLIST_KEY);
@@ -24,13 +29,48 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const { showToast } = useToast();
 
+  // Load saved wishlist for user when logging in
+  useEffect(() => {
+    if (user?._id && user._id !== prevUserIdRef.current) {
+      try {
+        const savedUserWishlist = localStorage.getItem(`lumiere_wishlist_${user._id}`);
+        if (savedUserWishlist) {
+          const parsed = JSON.parse(savedUserWishlist);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setFavorites(parsed);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    prevUserIdRef.current = user?._id;
+  }, [user]);
+
+  // Handle logout event: clean up wishlist completely
+  useEffect(() => {
+    const handleLogout = () => {
+      setFavorites([]);
+      localStorage.removeItem(WISHLIST_KEY);
+    };
+
+    window.addEventListener('lumiere:logout', handleLogout);
+    return () => {
+      window.removeEventListener('lumiere:logout', handleLogout);
+    };
+  }, []);
+
+  // Sync favorites to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(WISHLIST_KEY, JSON.stringify(favorites));
+      if (user?._id) {
+        localStorage.setItem(`lumiere_wishlist_${user._id}`, JSON.stringify(favorites));
+      }
     } catch (e) {
       console.error(e);
     }
-  }, [favorites]);
+  }, [favorites, user]);
 
   const isFavorite = (productId: string) => {
     return favorites.some((item) => item._id === productId);
@@ -51,6 +91,14 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     showToast('Đã xóa khỏi danh sách yêu thích', 'info');
   };
 
+  const clearWishlist = () => {
+    setFavorites([]);
+    localStorage.removeItem(WISHLIST_KEY);
+    if (user?._id) {
+      localStorage.removeItem(`lumiere_wishlist_${user._id}`);
+    }
+  };
+
   return (
     <WishlistContext.Provider
       value={{
@@ -58,6 +106,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         isFavorite,
         toggleFavorite,
         removeFromFavorites,
+        clearWishlist,
       }}
     >
       {children}

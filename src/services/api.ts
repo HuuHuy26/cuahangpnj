@@ -56,6 +56,16 @@ const initStorage = () => {
   }
   if (!localStorage.getItem(STORAGE_KEYS.USERS)) {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(INITIAL_USERS));
+  } else {
+    // Đảm bảo có tài khoản mẫu bị khóa để Quản trị viên test mở khóa
+    const storedUsers = getStored<User[]>(STORAGE_KEYS.USERS, []);
+    if (!storedUsers.some(u => u._id === 'usr-customer-3')) {
+      const lockedDemo = INITIAL_USERS.find(u => u._id === 'usr-customer-3');
+      if (lockedDemo) {
+        storedUsers.push(lockedDemo);
+        setStored(STORAGE_KEYS.USERS, storedUsers);
+      }
+    }
   }
 };
 
@@ -129,10 +139,10 @@ export const apiService = {
       const cleanPassword = (data.password || '').trim();
 
       // Check if trying to log in as admin
-      const isAdminLogin = 
-        cleanEmail === 'admin@3ae.vn' || 
-        cleanEmail === 'admin@lumiere.vn' || 
-        cleanEmail === 'admin' || 
+      const isAdminLogin =
+        cleanEmail === 'admin@3ae.vn' ||
+        cleanEmail === 'admin@lumiere.vn' ||
+        cleanEmail === 'admin' ||
         cleanEmail.startsWith('admin@');
 
       let users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
@@ -187,6 +197,12 @@ export const apiService = {
         }
       }
 
+      // Kiểm tra trạng thái tài khoản bị khóa
+      if (user.isLocked || user.status === 'locked') {
+        const reason = user.lockReason ? ` Lý do: ${user.lockReason}.` : '';
+        throw new Error(`Tài khoản của quý khách hiện đang bị tạm khóa.${reason} Vui lòng liên hệ Hotline 1800 8888 hoặc Quản trị viên để được hỗ trợ mở khóa.`);
+      }
+
       const token = 'jwt_token_' + Math.random().toString(36).substring(2);
       setStored(STORAGE_KEYS.TOKEN, token);
       setStored(STORAGE_KEYS.CURRENT_USER, user);
@@ -196,6 +212,9 @@ export const apiService = {
     async logout() {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
       localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+      localStorage.removeItem('lumiere_cart_items');
+      localStorage.removeItem('lumiere_cart_coupon');
+      localStorage.removeItem('lumiere_wishlist');
       return { success: true, message: 'Đã đăng xuất an toàn' };
     },
 
@@ -261,7 +280,7 @@ export const apiService = {
       const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
       const index = users.findIndex(u => u._id === userId);
       if (index === -1) throw new Error('Không tìm thấy người dùng');
-      
+
       users[index] = { ...users[index], ...data };
       setStored(STORAGE_KEYS.USERS, users);
       setStored(STORAGE_KEYS.CURRENT_USER, users[index]);
@@ -297,7 +316,7 @@ export const apiService = {
       }
       if (params?.search) {
         const query = params.search.toLowerCase().trim();
-        products = products.filter(p => 
+        products = products.filter(p =>
           p.name.toLowerCase().includes(query) ||
           p.sku.toLowerCase().includes(query) ||
           p.description.toLowerCase().includes(query)
@@ -497,7 +516,7 @@ export const apiService = {
         if (prod.stock < item.quantity) {
           throw new Error(`Sản phẩm ${prod.name} chỉ còn ${prod.stock} sản phẩm trong kho`);
         }
-        
+
         // Auto decrement stock
         prod.stock -= item.quantity;
         prod.sold += item.quantity;
@@ -639,7 +658,7 @@ export const apiService = {
       await new Promise(r => setTimeout(r, 200));
       const coupons = getStored<Coupon[]>(STORAGE_KEYS.COUPONS, INITIAL_COUPONS);
       const coupon = coupons.find(c => c.code.toUpperCase() === code.trim().toUpperCase() && c.status === 'active');
-      
+
       if (!coupon) {
         throw new Error('Mã giảm giá không tồn tại hoặc đã hết hạn!');
       }
@@ -793,7 +812,7 @@ export const apiService = {
 
   // Users & Customer Management
   users: {
-    async getAll(params?: { search?: string; role?: string }) {
+    async getAll(params?: { search?: string; role?: string; status?: string }) {
       try {
         const res = await apiClient.get('/users', { params });
         if (res.data?.success && res.data.data) {
@@ -805,6 +824,13 @@ export const apiService = {
       let users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
       if (params?.role && params.role !== 'all') {
         users = users.filter(u => u.role === params.role);
+      }
+      if (params?.status && params.status !== 'all') {
+        if (params.status === 'locked') {
+          users = users.filter(u => u.isLocked || u.status === 'locked');
+        } else if (params.status === 'active') {
+          users = users.filter(u => !u.isLocked && u.status !== 'locked');
+        }
       }
       if (params?.search) {
         const q = params.search.toLowerCase().trim();
@@ -933,6 +959,96 @@ export const apiService = {
       users = users.filter(u => u._id !== id);
       setStored(STORAGE_KEYS.USERS, users);
       return { success: true, message: 'Đã xóa người dùng khỏi hệ thống!' };
+    },
+
+    async unlock(id: string) {
+      try {
+        const res = await apiClient.patch(`/users/${id}/unlock`);
+        if (res.data?.success) {
+          const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+          const idx = users.findIndex(u => u._id === id);
+          if (idx !== -1) {
+            users[idx] = {
+              ...users[idx],
+              status: 'active',
+              isLocked: false,
+              lockReason: undefined,
+              lockedAt: undefined,
+            };
+            setStored(STORAGE_KEYS.USERS, users);
+          }
+          return res.data;
+        }
+      } catch (e: any) {
+        // Fallback to localStorage
+      }
+
+      const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+      const idx = users.findIndex(u => u._id === id);
+      if (idx === -1) throw new Error('Không tìm thấy tài khoản người dùng!');
+
+      users[idx] = {
+        ...users[idx],
+        status: 'active',
+        isLocked: false,
+        lockReason: undefined,
+        lockedAt: undefined,
+      };
+      setStored(STORAGE_KEYS.USERS, users);
+      return {
+        success: true,
+        message: `Đã mở khóa tài khoản cho ${users[idx].name} thành công!`,
+        data: users[idx]
+      };
+    },
+
+    async lock(id: string, reason?: string) {
+      if (id === 'usr-admin') {
+        throw new Error('Không thể khóa tài khoản Quản Trị Viên gốc của hệ thống!');
+      }
+
+      try {
+        const res = await apiClient.patch(`/users/${id}/lock`, { reason });
+        if (res.data?.success) {
+          const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+          const idx = users.findIndex(u => u._id === id);
+          if (idx !== -1) {
+            users[idx] = {
+              ...users[idx],
+              status: 'locked',
+              isLocked: true,
+              lockReason: reason || 'Tài khoản tạm khóa theo quyết định của Quản Trị Viên',
+              lockedAt: new Date().toISOString(),
+            };
+            setStored(STORAGE_KEYS.USERS, users);
+          }
+          return res.data;
+        }
+      } catch (e: any) {
+        // Fallback to localStorage
+      }
+
+      const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+      const idx = users.findIndex(u => u._id === id);
+      if (idx === -1) throw new Error('Không tìm thấy tài khoản người dùng!');
+
+      if (users[idx].email === 'admin@3ae.vn' || users[idx]._id === 'usr-admin') {
+        throw new Error('Không thể khóa tài khoản Quản Trị Viên gốc!');
+      }
+
+      users[idx] = {
+        ...users[idx],
+        status: 'locked',
+        isLocked: true,
+        lockReason: reason || 'Tài khoản tạm khóa theo quyết định của Quản Trị Viên',
+        lockedAt: new Date().toISOString(),
+      };
+      setStored(STORAGE_KEYS.USERS, users);
+      return {
+        success: true,
+        message: `Đã khóa tài khoản của ${users[idx].name} thành công!`,
+        data: users[idx]
+      };
     }
   },
 

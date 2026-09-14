@@ -57,7 +57,7 @@ export default function App() {
                   <Route path="/account" element={<AccountPage />} />
                   <Route path="/4c-standards" element={<Standards4CPage />} />
                   <Route path="/news" element={<NewsPage />} />
-                  
+
                   {/* Fallback to Home */}
                   <Route path="*" element={<HomePage />} />
                 </Route>

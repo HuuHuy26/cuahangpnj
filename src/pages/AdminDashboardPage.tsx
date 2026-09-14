@@ -33,7 +33,10 @@ import {
   Phone,
   MapPin,
   Calendar,
-  UserCheck
+  UserCheck,
+  Unlock,
+  KeyRound,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -84,10 +87,20 @@ export const AdminDashboardPage: React.FC = () => {
   // Customer Management States
   const [customerSearchTerm, setCustomerSearchTerm] = useState('');
   const [customerRoleFilter, setCustomerRoleFilter] = useState<'all' | 'customer' | 'admin'>('all');
+  const [customerStatusFilter, setCustomerStatusFilter] = useState<'all' | 'active' | 'locked'>('all');
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<(Partial<User> & { password?: string }) | null>(null);
   const [customerDetailModalOpen, setCustomerDetailModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<User | null>(null);
+
+  // Lock / Unlock Modal States
+  const [unlockModalOpen, setUnlockModalOpen] = useState(false);
+  const [userToUnlock, setUserToUnlock] = useState<User | null>(null);
+  const [lockModalOpen, setLockModalOpen] = useState(false);
+  const [userToLock, setUserToLock] = useState<User | null>(null);
+  const [lockReason, setLockReason] = useState('Vi phạm chính sách bảo mật / gian lận đơn hàng');
+  const [customLockReason, setCustomLockReason] = useState('');
+  const [isProcessingLockAction, setIsProcessingLockAction] = useState(false);
 
   useEffect(() => {
     // Kiểm tra quyền: Nếu đã đăng nhập nhưng không phải admin (ví dụ: Khách hàng VIP)
@@ -326,6 +339,91 @@ export const AdminDashboardPage: React.FC = () => {
     }
   };
 
+  // Mở khóa tài khoản
+  const handleOpenUnlockModal = (targetUser: User) => {
+    setUserToUnlock(targetUser);
+    setUnlockModalOpen(true);
+  };
+
+  const handleConfirmUnlock = async () => {
+    if (!userToUnlock) return;
+    setIsProcessingLockAction(true);
+    try {
+      const res = await apiService.users.unlock(userToUnlock._id);
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === userToUnlock._id
+            ? { ...u, status: 'active', isLocked: false, lockReason: undefined, lockedAt: undefined }
+            : u
+        )
+      );
+      if (selectedCustomer?._id === userToUnlock._id) {
+        setSelectedCustomer({
+          ...selectedCustomer,
+          status: 'active',
+          isLocked: false,
+          lockReason: undefined,
+          lockedAt: undefined,
+        });
+      }
+      showToast(res.message || `Đã mở khóa tài khoản cho ${userToUnlock.name} thành công!`, 'success');
+      setUnlockModalOpen(false);
+      setUserToUnlock(null);
+    } catch (err: any) {
+      showToast(err.message || 'Mở khóa tài khoản thất bại', 'error');
+    } finally {
+      setIsProcessingLockAction(false);
+    }
+  };
+
+  // Khóa tài khoản
+  const handleOpenLockModal = (targetUser: User) => {
+    if (targetUser._id === 'usr-admin' || targetUser.email === 'admin@3ae.vn') {
+      window.alert('🚫 Không thể khóa tài khoản Quản Trị Viên gốc của hệ thống!');
+      return;
+    }
+    if (user?._id === targetUser._id) {
+      window.alert('🚫 Bạn không thể tự khóa tài khoản quản trị đang đăng nhập!');
+      return;
+    }
+    setUserToLock(targetUser);
+    setLockReason('Vi phạm chính sách bảo mật / gian lận đơn hàng');
+    setCustomLockReason('');
+    setLockModalOpen(true);
+  };
+
+  const handleConfirmLock = async () => {
+    if (!userToLock) return;
+    const finalReason = lockReason === 'Khác' ? customLockReason.trim() || 'Tài khoản bị tạm khóa bởi Quản Trị Viên' : lockReason;
+    setIsProcessingLockAction(true);
+    try {
+      const res = await apiService.users.lock(userToLock._id, finalReason);
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === userToLock._id
+            ? { ...u, status: 'locked', isLocked: true, lockReason: finalReason, lockedAt: new Date().toISOString() }
+            : u
+        )
+      );
+      if (selectedCustomer?._id === userToLock._id) {
+        setSelectedCustomer({
+          ...selectedCustomer,
+          status: 'locked',
+          isLocked: true,
+          lockReason: finalReason,
+          lockedAt: new Date().toISOString(),
+        });
+      }
+      showToast(res.message || `Đã khóa tài khoản của ${userToLock.name}!`, 'success');
+      setLockModalOpen(false);
+      setUserToLock(null);
+    } catch (err: any) {
+      showToast(err.message || 'Khóa tài khoản thất bại', 'error');
+    } finally {
+      setIsProcessingLockAction(false);
+    }
+  };
+
   // Open Create Customer Modal
   const handleOpenCreateCustomer = () => {
     setEditingCustomer({
@@ -441,14 +539,20 @@ export const AdminDashboardPage: React.FC = () => {
   // Filtered Users List
   const filteredUsers = users.filter((u) => {
     const matchesRole = customerRoleFilter === 'all' || u.role === customerRoleFilter;
+    const isUserLocked = u.isLocked || u.status === 'locked';
+    const matchesStatus =
+      customerStatusFilter === 'all' ||
+      (customerStatusFilter === 'locked' && isUserLocked) ||
+      (customerStatusFilter === 'active' && !isUserLocked);
     const q = customerSearchTerm.toLowerCase().trim();
     const matchesSearch =
       !q ||
       u.name.toLowerCase().includes(q) ||
       u.email.toLowerCase().includes(q) ||
       (u.phone && u.phone.includes(q)) ||
-      (u.address && u.address.toLowerCase().includes(q));
-    return matchesRole && matchesSearch;
+      (u.address && u.address.toLowerCase().includes(q)) ||
+      (u.lockReason && u.lockReason.toLowerCase().includes(q));
+    return matchesRole && matchesStatus && matchesSearch;
   });
 
   // Product Delete
@@ -548,7 +652,13 @@ export const AdminDashboardPage: React.FC = () => {
             { key: 'products', label: 'Quản Lý Sản Phẩm', icon: Diamond, count: products.length },
             { key: 'orders', label: 'Quản Lý Đơn Hàng', icon: ShoppingBag, alert: pendingOrdersCount, count: orders.length },
             { key: 'categories', label: 'Danh Mục Hàng Hóa', icon: Package, count: categories.length },
-            { key: 'users', label: 'Danh Sách Khách Hàng', icon: Users, count: users.length },
+            { 
+              key: 'users', 
+              label: 'Danh Sách Khách Hàng', 
+              icon: Users, 
+              alert: users.filter((u) => u.isLocked || u.status === 'locked').length, 
+              count: users.length 
+            },
             { key: 'coupons', label: 'Mã Giảm Giá Voucher', icon: Tag, count: coupons.length },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -986,7 +1096,7 @@ export const AdminDashboardPage: React.FC = () => {
         {activeTab === 'users' && (
           <div className="space-y-6">
             {/* Top Stat Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white rounded-2xl p-5 border border-[#E8E2D5] shadow-xs flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-[#0B192C]/5 text-[#0B192C] flex items-center justify-center font-bold">
                   <Users className="w-6 h-6 text-[#997A15]" />
@@ -1020,7 +1130,60 @@ export const AdminDashboardPage: React.FC = () => {
                   <div className="text-xs text-gray-500 font-medium">Quản Trị Viên & Điều Hành</div>
                 </div>
               </div>
+
+              {/* Thẻ Thống Kê Tài Khoản Bị Khóa */}
+              <div 
+                onClick={() => setCustomerStatusFilter(customerStatusFilter === 'locked' ? 'all' : 'locked')}
+                className={`rounded-2xl p-5 border shadow-xs flex items-center gap-4 cursor-pointer transition-all ${
+                  customerStatusFilter === 'locked'
+                    ? 'bg-rose-100/70 border-rose-400 ring-2 ring-rose-300'
+                    : 'bg-white border-[#E8E2D5] hover:border-rose-300'
+                }`}
+                title="Bấm để lọc nhanh danh sách tài khoản bị khóa"
+              >
+                <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold font-serif text-rose-600">
+                    {users.filter((u) => u.isLocked || u.status === 'locked').length}
+                  </div>
+                  <div className="text-xs text-gray-500 font-medium flex items-center gap-1.5">
+                    <span>Tài Khoản Bị Khóa</span>
+                    {users.filter((u) => u.isLocked || u.status === 'locked').length > 0 && (
+                      <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Banner Thông Báo Có Tài Khoản Cần Mở Khóa */}
+            {users.filter((u) => u.isLocked || u.status === 'locked').length > 0 && customerStatusFilter !== 'locked' && (
+              <div className="bg-gradient-to-r from-amber-50 to-rose-50 border border-rose-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                    <ShieldAlert className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-gray-900 flex items-center gap-2">
+                      <span>Phát hiện {users.filter((u) => u.isLocked || u.status === 'locked').length} tài khoản khách hàng đang bị khóa</span>
+                      <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">Cần Kiểm Tra</span>
+                    </div>
+                    <p className="text-[11px] text-gray-500 mt-0.5">
+                      Quản trị viên có thể xem nguyên nhân khóa và bấm nút "Mở Khóa" để mở lại quyền truy cập cho khách hàng.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setCustomerStatusFilter('locked')}
+                  className="px-3.5 py-1.5 bg-[#0B192C] text-[#F4E8C1] hover:bg-[#1E3E62] rounded-xl text-xs font-bold transition-colors cursor-pointer shrink-0 flex items-center gap-1.5"
+                >
+                  <Unlock className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Xem & Mở Khóa Ngay</span>
+                </button>
+              </div>
+            )}
 
             {/* Main Content Card */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-[#E8E2D5] space-y-6">
@@ -1068,6 +1231,19 @@ export const AdminDashboardPage: React.FC = () => {
                     <option value="admin">Quản Trị Viên</option>
                   </select>
 
+                  {/* Status filter */}
+                  <select
+                    value={customerStatusFilter}
+                    onChange={(e) => setCustomerStatusFilter(e.target.value as any)}
+                    className="p-2 bg-[#FAF8F5] border border-gray-300 rounded-xl text-xs font-medium focus:outline-none focus:border-[#D4AF37]"
+                  >
+                    <option value="all">Tất Cả Trạng Thái</option>
+                    <option value="active">Đang Hoạt Động</option>
+                    <option value="locked">
+                      Đã Bị Khóa ({users.filter((u) => u.isLocked || u.status === 'locked').length})
+                    </option>
+                  </select>
+
                   {/* Add Customer Button */}
                   <button
                     onClick={handleOpenCreateCustomer}
@@ -1090,13 +1266,14 @@ export const AdminDashboardPage: React.FC = () => {
                       <th className="p-3 text-center">Đơn Đã Mua</th>
                       <th className="p-3 text-right">Tổng Chi Tiêu</th>
                       <th className="p-3">Vai Trò</th>
+                      <th className="p-3">Trạng Thái</th>
                       <th className="p-3 text-center">Thao Tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {filteredUsers.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="p-8 text-center text-gray-400">
+                        <td colSpan={8} className="p-8 text-center text-gray-400">
                           <Users className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                           <p>Không tìm thấy khách hàng nào phù hợp với điều kiện tìm kiếm.</p>
                         </td>
@@ -1105,6 +1282,7 @@ export const AdminDashboardPage: React.FC = () => {
                       filteredUsers.map((u) => {
                         const customerOrders = getCustomerOrders(u);
                         const totalSpent = getCustomerTotalSpent(u);
+                        const isUserLocked = u.isLocked || u.status === 'locked';
                         return (
                           <tr key={u._id} className="hover:bg-[#FAF8F5] transition-colors">
                             <td className="p-3">
@@ -1168,8 +1346,52 @@ export const AdminDashboardPage: React.FC = () => {
                               </button>
                             </td>
 
+                            {/* Cột Trạng Thái Tài Khoản */}
+                            <td className="p-3">
+                              {isUserLocked ? (
+                                <div className="inline-flex flex-col">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-rose-100 text-rose-800 border border-rose-200 shadow-xs">
+                                    <Lock className="w-3 h-3 text-rose-600 shrink-0" />
+                                    <span>Đã Bị Khóa</span>
+                                  </span>
+                                  {u.lockReason && (
+                                    <span className="text-[10px] text-gray-500 mt-1 max-w-[150px] truncate" title={u.lockReason}>
+                                      {u.lockReason}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+                                  <span>Hoạt Động</span>
+                                </span>
+                              )}
+                            </td>
+
                             <td className="p-3 text-center">
                               <div className="flex items-center justify-center gap-1.5">
+                                {/* Nút Mở Khóa / Khóa Tài Khoản */}
+                                {u.email !== 'admin@3ae.vn' && u._id !== 'usr-admin' && user?._id !== u._id && (
+                                  isUserLocked ? (
+                                    <button
+                                      onClick={() => handleOpenUnlockModal(u)}
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-xs cursor-pointer"
+                                      title="Mở khóa tài khoản khách hàng ngay"
+                                    >
+                                      <Unlock className="w-3.5 h-3.5" />
+                                      <span>Mở Khóa</span>
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => handleOpenLockModal(u)}
+                                      className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                                      title="Tạm khóa tài khoản khách hàng"
+                                    >
+                                      <Lock className="w-4 h-4" />
+                                    </button>
+                                  )
+                                )}
+
                                 {/* Xem Chi Tiết */}
                                 <button
                                   onClick={() => handleViewCustomerDetail(u)}
@@ -1596,6 +1818,36 @@ export const AdminDashboardPage: React.FC = () => {
                       <span className="text-gray-500">Ngày tạo:</span>
                       <span className="text-gray-600">{selectedCustomer.createdAt ? formatDate(selectedCustomer.createdAt) : '2026-01-15'}</span>
                     </div>
+                    <div className="flex justify-between items-center pt-1 border-t border-gray-100">
+                      <span className="text-gray-500">Trạng Thái:</span>
+                      {selectedCustomer.isLocked || selectedCustomer.status === 'locked' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-rose-100 text-rose-800 border border-rose-200">
+                          <Lock className="w-3 h-3 text-rose-600" />
+                          <span>Đã Bị Khóa</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>Đang Hoạt Động</span>
+                        </span>
+                      )}
+                    </div>
+                    {(selectedCustomer.isLocked || selectedCustomer.status === 'locked') && (
+                      <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl space-y-1 mt-1">
+                        <div className="text-[11px] font-bold text-rose-800 flex items-center gap-1.5">
+                          <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+                          <span>Lý do khóa tài khoản:</span>
+                        </div>
+                        <div className="text-rose-700 text-[11px] pl-5">
+                          {selectedCustomer.lockReason || 'Khóa theo quyết định của Quản Trị Viên'}
+                        </div>
+                        {selectedCustomer.lockedAt && (
+                          <div className="text-[10px] text-gray-500 pl-5">
+                            Thời điểm khóa: {formatDate(selectedCustomer.lockedAt)}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1692,22 +1944,49 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-[#FAF8F5] px-6 py-4 border-t border-gray-200 flex justify-between items-center">
-              <button
-                onClick={() => {
-                  setCustomerDetailModalOpen(false);
-                  handleOpenEditCustomer(selectedCustomer);
-                }}
-                className="px-4 py-2 bg-white border border-[#D4AF37] text-[#997A15] font-bold rounded-xl hover:bg-[#FAF8F5] flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Edit className="w-4 h-4" />
-                <span>Chỉnh Sửa Hồ Sơ</span>
-              </button>
+            <div className="bg-[#FAF8F5] px-6 py-4 border-t border-gray-200 flex flex-wrap justify-between items-center gap-3">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setCustomerDetailModalOpen(false);
+                    handleOpenEditCustomer(selectedCustomer);
+                  }}
+                  className="px-4 py-2 bg-white border border-[#D4AF37] text-[#997A15] font-bold rounded-xl hover:bg-[#FAF8F5] flex items-center gap-1.5 transition-colors cursor-pointer text-xs"
+                >
+                  <Edit className="w-4 h-4" />
+                  <span>Chỉnh Sửa Hồ Sơ</span>
+                </button>
+
+                {/* Nút Mở Khóa / Khóa trực tiếp trong Modal Chi Tiết */}
+                {selectedCustomer.email !== 'admin@3ae.vn' && selectedCustomer._id !== 'usr-admin' && user?._id !== selectedCustomer._id && (
+                  (selectedCustomer.isLocked || selectedCustomer.status === 'locked') ? (
+                    <button
+                      onClick={() => {
+                        handleOpenUnlockModal(selectedCustomer);
+                      }}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer text-xs shadow-xs"
+                    >
+                      <Unlock className="w-4 h-4" />
+                      <span>Mở Khóa Tài Khoản Này</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        handleOpenLockModal(selectedCustomer);
+                      }}
+                      className="px-4 py-2 bg-white border border-rose-300 text-rose-600 hover:bg-rose-50 font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer text-xs"
+                    >
+                      <Lock className="w-4 h-4" />
+                      <span>Khóa Tài Khoản</span>
+                    </button>
+                  )
+                )}
+              </div>
 
               <button
                 type="button"
                 onClick={() => setCustomerDetailModalOpen(false)}
-                className="px-5 py-2 bg-[#0B192C] text-[#F4E8C1] font-bold rounded-xl hover:bg-[#1E3E62] transition-colors cursor-pointer"
+                className="px-5 py-2 bg-[#0B192C] text-[#F4E8C1] font-bold rounded-xl hover:bg-[#1E3E62] transition-colors cursor-pointer text-xs"
               >
                 Đóng
               </button>
@@ -1835,6 +2114,54 @@ export const AdminDashboardPage: React.FC = () => {
                     />
                   </div>
                 </div>
+                {/* Account Status (Khi chỉnh sửa khách hàng) */}
+                {editingCustomer._id && editingCustomer._id !== 'usr-admin' && editingCustomer.email !== 'admin@3ae.vn' && user?._id !== editingCustomer._id && (
+                  <div className="space-y-1 sm:col-span-2 p-3.5 rounded-2xl bg-[#FAF8F5] border border-gray-200">
+                    <label className="font-bold text-gray-700 block mb-2">Trạng Thái Quyền Truy Cập</label>
+                    <div className="flex flex-wrap gap-4 items-center">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="customerFormStatus"
+                          checked={!editingCustomer.isLocked && editingCustomer.status !== 'locked'}
+                          onChange={() => setEditingCustomer({ ...editingCustomer, status: 'active', isLocked: false, lockReason: '' })}
+                          className="accent-emerald-600"
+                        />
+                        <span className="text-emerald-700 font-bold flex items-center gap-1 text-xs">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Đang Hoạt Động (Mở Khóa)</span>
+                        </span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="customerFormStatus"
+                          checked={editingCustomer.isLocked || editingCustomer.status === 'locked'}
+                          onChange={() => setEditingCustomer({ ...editingCustomer, status: 'locked', isLocked: true, lockReason: editingCustomer.lockReason || 'Khóa bởi Quản trị viên' })}
+                          className="accent-rose-600"
+                        />
+                        <span className="text-rose-700 font-bold flex items-center gap-1 text-xs">
+                          <Lock className="w-3.5 h-3.5 text-rose-600" />
+                          <span>Tạm Khóa Tài Khoản</span>
+                        </span>
+                      </label>
+                    </div>
+
+                    {(editingCustomer.isLocked || editingCustomer.status === 'locked') && (
+                      <div className="pt-2">
+                        <label className="text-[11px] font-semibold text-gray-600 block">Lý do khóa tài khoản:</label>
+                        <input
+                          type="text"
+                          placeholder="Ví dụ: Vi phạm điều khoản, gian lận đơn hàng..."
+                          value={editingCustomer.lockReason || ''}
+                          onChange={(e) => setEditingCustomer({ ...editingCustomer, lockReason: e.target.value })}
+                          className="w-full mt-1 p-2 bg-white border border-gray-300 rounded-xl text-xs focus:outline-none focus:border-rose-400"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -1854,6 +2181,211 @@ export const AdminDashboardPage: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 1. Modal Xác Nhận Mở Khóa Tài Khoản */}
+      {unlockModalOpen && userToUnlock && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-[#E8E2D5] flex flex-col">
+            {/* Header */}
+            <div className="bg-[#0B192C] text-[#F4E8C1] px-6 py-4 flex items-center justify-between border-b border-[#D4AF37]/30">
+              <h3 className="text-base font-bold font-serif flex items-center gap-2">
+                <Unlock className="w-5 h-5 text-emerald-400" />
+                <span>Mở Khóa Quyền Truy Cập</span>
+              </h3>
+              <button
+                onClick={() => setUnlockModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-4 text-xs text-gray-700">
+              <div className="flex items-center gap-3.5 p-3 bg-[#FAF8F5] rounded-2xl border border-gray-200">
+                <img
+                  src={userToUnlock.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}
+                  alt={userToUnlock.name}
+                  className="w-12 h-12 rounded-full object-cover border border-[#D4AF37]/40 bg-gray-100 shrink-0"
+                  onError={(ev) => {
+                    (ev.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80';
+                  }}
+                />
+                <div className="min-w-0">
+                  <div className="font-bold text-sm text-gray-900 truncate">{userToUnlock.name}</div>
+                  <div className="font-mono text-gray-600 truncate">{userToUnlock.email}</div>
+                  <div className="text-[11px] text-gray-500">{userToUnlock.phone || 'Chưa có SĐT'}</div>
+                </div>
+              </div>
+
+              <div className="bg-rose-50 border border-rose-200/80 rounded-2xl p-3.5 space-y-1.5">
+                <div className="font-bold text-rose-900 flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>Thông tin trạng thái khóa:</span>
+                </div>
+                <div className="text-gray-700 pl-5 leading-relaxed">
+                  Lý do: <span className="font-semibold text-rose-800">{userToUnlock.lockReason || 'Khóa bởi Quản trị viên'}</span>
+                </div>
+                {userToUnlock.lockedAt && (
+                  <div className="text-[11px] text-gray-500 pl-5">
+                    Thời điểm khóa: {formatDate(userToUnlock.lockedAt)}
+                  </div>
+                )}
+              </div>
+
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-900 leading-relaxed space-y-1">
+                <div className="font-bold flex items-center gap-1.5 text-emerald-800">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Hiệu lực sau khi mở khóa:</span>
+                </div>
+                <p className="pl-5 text-emerald-800">
+                  Khách hàng sẽ có thể đăng nhập bình thường vào hệ thống, tiếp tục đặt hàng và hưởng trọn vẹn đặc quyền hội viên VIP.
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-[#FAF8F5] px-6 py-4 border-t border-gray-200 flex justify-end items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setUnlockModalOpen(false)}
+                disabled={isProcessingLockAction}
+                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-100 transition-colors cursor-pointer text-xs"
+              >
+                Hủy Bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmUnlock}
+                disabled={isProcessingLockAction}
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center gap-2 transition-colors cursor-pointer text-xs shadow-md"
+              >
+                {isProcessingLockAction ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Đang Mở Khóa...</span>
+                  </>
+                ) : (
+                  <>
+                    <Unlock className="w-4 h-4" />
+                    <span>Xác Nhận Mở Khóa Ngay</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Modal Khóa Tài Khoản */}
+      {lockModalOpen && userToLock && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-[#E8E2D5] flex flex-col">
+            {/* Header */}
+            <div className="bg-[#0B192C] text-[#F4E8C1] px-6 py-4 flex items-center justify-between border-b border-[#D4AF37]/30">
+              <h3 className="text-base font-bold font-serif flex items-center gap-2">
+                <Lock className="w-5 h-5 text-rose-400" />
+                <span>Tạm Khóa Tài Khoản Khách Hàng</span>
+              </h3>
+              <button
+                onClick={() => setLockModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-4 text-xs text-gray-700">
+              <div className="flex items-center gap-3.5 p-3 bg-[#FAF8F5] rounded-2xl border border-gray-200">
+                <img
+                  src={userToLock.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}
+                  alt={userToLock.name}
+                  className="w-12 h-12 rounded-full object-cover border border-[#D4AF37]/40 bg-gray-100 shrink-0"
+                  onError={(ev) => {
+                    (ev.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80';
+                  }}
+                />
+                <div className="min-w-0">
+                  <div className="font-bold text-sm text-gray-900 truncate">{userToLock.name}</div>
+                  <div className="font-mono text-gray-600 truncate">{userToLock.email}</div>
+                  <div className="text-[11px] text-gray-500">{userToLock.phone || 'Chưa có SĐT'}</div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="font-bold text-gray-900 block">Lý do khóa tài khoản *</label>
+                {[
+                  'Vi phạm chính sách đặt hàng / bom hàng nhiều lần',
+                  'Nghi vấn bảo mật / gian lận giao dịch thẻ',
+                  'Đăng nhập bất thường nhiều lần từ địa chỉ IP lạ',
+                  'Yêu cầu tạm ngưng dịch vụ từ chính chủ tài khoản',
+                  'Khác',
+                ].map((r) => (
+                  <label key={r} className="flex items-center gap-2 p-2 rounded-xl hover:bg-[#FAF8F5] border border-transparent hover:border-gray-200 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="lockReason"
+                      checked={lockReason === r}
+                      onChange={() => setLockReason(r)}
+                      className="accent-[#D4AF37]"
+                    />
+                    <span className="text-gray-700 font-medium">{r}</span>
+                  </label>
+                ))}
+
+                {lockReason === 'Khác' && (
+                  <input
+                    type="text"
+                    placeholder="Nhập chi tiết lý do tạm khóa..."
+                    value={customLockReason}
+                    onChange={(e) => setCustomLockReason(e.target.value)}
+                    className="w-full mt-2 p-2.5 bg-[#FAF8F5] border border-gray-300 rounded-xl text-xs focus:outline-none focus:border-[#D4AF37]"
+                    autoFocus
+                  />
+                )}
+              </div>
+
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 text-[11px] flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <p>
+                  Khi bị khóa, khách hàng sẽ bị chặn đăng nhập và nhận được thông báo kèm lý do đã chọn. Bạn có thể mở khóa bất cứ lúc nào.
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-[#FAF8F5] px-6 py-4 border-t border-gray-200 flex justify-end items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setLockModalOpen(false)}
+                disabled={isProcessingLockAction}
+                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-100 transition-colors cursor-pointer text-xs"
+              >
+                Hủy Bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmLock}
+                disabled={isProcessingLockAction}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl flex items-center gap-2 transition-colors cursor-pointer text-xs shadow-md"
+              >
+                {isProcessingLockAction ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Đang Khóa...</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Xác Nhận Khóa Tài Khoản</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

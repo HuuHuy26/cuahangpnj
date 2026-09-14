@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
   avatar: { type: String },
   role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
   isPhoneVerified: { type: Boolean, default: false },
+  status: { type: String, enum: ['active', 'locked'], default: 'active' },
+  isLocked: { type: Boolean, default: false },
+  lockedAt: { type: Date },
+  lockReason: { type: String },
 }, {
   timestamps: true,
   _id: false

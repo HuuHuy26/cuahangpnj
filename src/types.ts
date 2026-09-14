@@ -8,6 +8,10 @@ export interface User {
   avatar?: string;
   createdAt: string;
   isPhoneVerified?: boolean;
+  status?: 'active' | 'locked';
+  isLocked?: boolean;
+  lockedAt?: string;
+  lockReason?: string;
 }
 
 export interface Category {
@@ -64,6 +68,7 @@ export interface CartItem {
   product: Product;
   quantity: number;
   selectedSize?: string;
+  size?: string;
   selectedMaterial?: string;
 }
 

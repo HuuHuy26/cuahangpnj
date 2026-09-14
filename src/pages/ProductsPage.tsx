@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { 
-  Filter, 
-  Search, 
-  X, 
-  ChevronDown, 
-  SlidersHorizontal, 
-  RotateCcw, 
+import {
+  Filter,
+  Search,
+  X,
+  ChevronDown,
+  SlidersHorizontal,
+  RotateCcw,
   Sparkles,
   Diamond,
   Check
@@ -144,7 +144,7 @@ export const ProductsPage: React.FC = () => {
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Breadcrumb & Title */}
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold font-serif text-[#0B192C]">
@@ -159,7 +159,7 @@ export const ProductsPage: React.FC = () => {
 
         {/* Filter Bar / Controls */}
         <div className="bg-white p-4 rounded-2xl shadow-xs border border-[#E8E2D5] mb-8 flex flex-wrap items-center justify-between gap-4">
-          
+
           {/* Left search */}
           <div className="relative flex-1 min-w-[240px] max-w-md">
             <input
@@ -211,11 +211,11 @@ export const ProductsPage: React.FC = () => {
 
         {/* Main Content Layout (Sidebar Filter + Product Grid) */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          
+
           {/* Desktop Filter Sidebar */}
           <div className="hidden lg:block space-y-6">
             <div className="bg-white p-5 rounded-2xl shadow-xs border border-[#E8E2D5] space-y-6">
-              
+
               <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#0B192C] flex items-center gap-1.5">
                   <SlidersHorizontal className="w-4 h-4 text-[#D4AF37]" />
@@ -239,11 +239,10 @@ export const ProductsPage: React.FC = () => {
                 <div className="space-y-1.5">
                   <button
                     onClick={() => setSelectedCategory('')}
-                    className={`w-full text-left text-xs px-2.5 py-1.5 rounded-lg transition-colors flex items-center justify-between ${
-                      selectedCategory === ''
+                    className={`w-full text-left text-xs px-2.5 py-1.5 rounded-lg transition-colors flex items-center justify-between ${selectedCategory === ''
                         ? 'bg-[#0B192C] text-[#F4E8C1] font-semibold'
                         : 'text-gray-600 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <span>Tất cả sản phẩm</span>
                     {selectedCategory === '' && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
@@ -252,11 +251,10 @@ export const ProductsPage: React.FC = () => {
                     <button
                       key={cat._id}
                       onClick={() => setSelectedCategory(cat.slug)}
-                      className={`w-full text-left text-xs px-2.5 py-1.5 rounded-lg transition-colors flex items-center justify-between ${
-                        selectedCategory === cat.slug || selectedCategory === cat._id
+                      className={`w-full text-left text-xs px-2.5 py-1.5 rounded-lg transition-colors flex items-center justify-between ${selectedCategory === cat.slug || selectedCategory === cat._id
                           ? 'bg-[#0B192C] text-[#F4E8C1] font-semibold'
                           : 'text-gray-600 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       <span className="truncate">{cat.name}</span>
                       {(selectedCategory === cat.slug || selectedCategory === cat._id) && (
@@ -277,11 +275,10 @@ export const ProductsPage: React.FC = () => {
                     <button
                       key={shape}
                       onClick={() => setSelectedShape(selectedShape === shape ? '' : shape)}
-                      className={`px-2 py-1.5 text-xs rounded-lg border text-center transition-all ${
-                        selectedShape === shape
+                      className={`px-2 py-1.5 text-xs rounded-lg border text-center transition-all ${selectedShape === shape
                           ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C] font-semibold'
                           : 'bg-white text-gray-600 border-gray-200 hover:border-[#D4AF37]'
-                      }`}
+                        }`}
                     >
                       {shape}
                     </button>
@@ -326,11 +323,10 @@ export const ProductsPage: React.FC = () => {
                     <button
                       key={c}
                       onClick={() => setSelectedColor(selectedColor === c ? '' : c)}
-                      className={`w-8 h-8 rounded-lg border text-xs font-semibold flex items-center justify-center transition-all ${
-                        selectedColor === c
+                      className={`w-8 h-8 rounded-lg border text-xs font-semibold flex items-center justify-center transition-all ${selectedColor === c
                           ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C]'
                           : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
-                      }`}
+                        }`}
                     >
                       {c}
                     </button>
@@ -348,11 +344,10 @@ export const ProductsPage: React.FC = () => {
                     <button
                       key={clarity}
                       onClick={() => setSelectedClarity(selectedClarity === clarity ? '' : clarity)}
-                      className={`px-1.5 py-1 text-[11px] font-semibold rounded-lg border text-center transition-all ${
-                        selectedClarity === clarity
+                      className={`px-1.5 py-1 text-[11px] font-semibold rounded-lg border text-center transition-all ${selectedClarity === clarity
                           ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C]'
                           : 'bg-white text-gray-600 border-gray-200 hover:border-[#D4AF37]'
-                      }`}
+                        }`}
                     >
                       {clarity}
                     </button>
@@ -370,11 +365,10 @@ export const ProductsPage: React.FC = () => {
                     <button
                       key={cert}
                       onClick={() => setSelectedCertificate(selectedCertificate === cert ? '' : cert)}
-                      className={`flex-1 py-1.5 text-xs font-bold rounded-lg border text-center transition-all ${
-                        selectedCertificate === cert
+                      className={`flex-1 py-1.5 text-xs font-bold rounded-lg border text-center transition-all ${selectedCertificate === cert
                           ? 'bg-[#0B192C] text-[#F4E8C1] border-[#0B192C]'
                           : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37]'
-                      }`}
+                        }`}
                     >
                       {cert}
                     </button>
@@ -392,11 +386,10 @@ export const ProductsPage: React.FC = () => {
                     <button
                       key={m}
                       onClick={() => setSelectedMaterial(selectedMaterial === m ? '' : m)}
-                      className={`w-full text-left text-xs px-2.5 py-1.5 rounded-lg border transition-all ${
-                        selectedMaterial === m
+                      className={`w-full text-left text-xs px-2.5 py-1.5 rounded-lg border transition-all ${selectedMaterial === m
                           ? 'bg-[#FAF8F5] text-[#0B192C] border-[#D4AF37] font-semibold'
                           : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                      }`}
+                        }`}
                     >
                       {m}
                     </button>
@@ -449,7 +442,7 @@ export const ProductsPage: React.FC = () => {
 
           {/* Product Grid Area */}
           <div className="lg:col-span-3 space-y-6">
-            
+
             {/* Active Filters Display Chips */}
             {(selectedCategory || selectedShape || selectedColor || selectedClarity || selectedMaterial || selectedCertificate || caratRange !== 'all' || priceRange !== 'all' || searchQuery) && (
               <div className="bg-white p-3.5 rounded-xl border border-[#E8E2D5] flex flex-wrap items-center gap-2 text-xs">
@@ -551,11 +544,10 @@ export const ProductsPage: React.FC = () => {
                   <button
                     key={idx + 1}
                     onClick={() => setCurrentPage(idx + 1)}
-                    className={`w-9 h-9 rounded-lg text-xs font-bold transition-all ${
-                      currentPage === idx + 1
+                    className={`w-9 h-9 rounded-lg text-xs font-bold transition-all ${currentPage === idx + 1
                         ? 'bg-[#0B192C] text-[#F4E8C1] border border-[#0B192C]'
                         : 'bg-white text-gray-700 border border-gray-300 hover:border-[#D4AF37]'
-                    }`}
+                      }`}
                   >
                     {idx + 1}
                   </button>
@@ -614,9 +606,8 @@ export const ProductsPage: React.FC = () => {
                     <button
                       key={s}
                       onClick={() => setSelectedShape(selectedShape === s ? '' : s)}
-                      className={`p-2 text-xs rounded border ${
-                        selectedShape === s ? 'bg-[#0B192C] text-[#F4E8C1]' : 'bg-white text-gray-700'
-                      }`}
+                      className={`p-2 text-xs rounded border ${selectedShape === s ? 'bg-[#0B192C] text-[#F4E8C1]' : 'bg-white text-gray-700'
+                        }`}
                     >
                       {s}
                     </button>

@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  User as UserIcon, 
-  Package, 
-  Heart, 
-  MapPin, 
-  LogOut, 
-  ShieldCheck, 
-  Clock, 
-  Truck, 
-  CheckCircle2, 
-  XCircle, 
-  Eye, 
+import {
+  User as UserIcon,
+  Package,
+  Heart,
+  MapPin,
+  LogOut,
+  ShieldCheck,
+  Clock,
+  Truck,
+  CheckCircle2,
+  XCircle,
+  Eye,
   EyeOff,
-  Sparkles, 
-  Diamond, 
-  Trash2, 
-  Phone, 
-  Mail, 
-  Printer, 
-  KeyRound, 
-  Lock 
+  Sparkles,
+  Diamond,
+  Trash2,
+  Phone,
+  Mail,
+  Printer,
+  KeyRound,
+  Lock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -204,7 +204,7 @@ export const AccountPage: React.FC = () => {
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        
+
         {/* User Card Top Banner */}
         <div className="bg-[#0B192C] text-white rounded-3xl p-6 sm:p-8 border border-[#D4AF37]/50 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -246,7 +246,7 @@ export const AccountPage: React.FC = () => {
 
         {/* Layout Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* Left Navigation Sidebar (4 cols) */}
           <div className="lg:col-span-4 bg-white rounded-3xl p-5 shadow-xs border border-[#E8E2D5] space-y-2">
             {[
@@ -264,20 +264,18 @@ export const AccountPage: React.FC = () => {
                     setActiveTab(tab.key);
                     setSearchParams({ tab: tab.key });
                   }}
-                  className={`w-full flex items-center justify-between p-3.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-[#0B192C] text-[#F4E8C1] shadow-md'
-                      : 'text-gray-700 hover:bg-[#FAF8F5] hover:text-[#997A15]'
-                  }`}
+                  className={`w-full flex items-center justify-between p-3.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${isActive
+                    ? 'bg-[#0B192C] text-[#F4E8C1] shadow-md'
+                    : 'text-gray-700 hover:bg-[#FAF8F5] hover:text-[#997A15]'
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon className={`w-4 h-4 ${isActive ? 'text-[#D4AF37]' : 'text-gray-400'}`} />
                     <span>{tab.label}</span>
                   </div>
                   {tab.badge !== undefined && tab.badge > 0 && (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                      isActive ? 'bg-[#D4AF37] text-[#0B192C]' : 'bg-gray-100 text-gray-600'
-                    }`}>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${isActive ? 'bg-[#D4AF37] text-[#0B192C]' : 'bg-gray-100 text-gray-600'
+                      }`}>
                       {tab.badge}
                     </span>
                   )}
@@ -288,7 +286,7 @@ export const AccountPage: React.FC = () => {
 
           {/* Right Content Body (8 cols) */}
           <div className="lg:col-span-8">
-            
+
             {/* Tab 1: Profile */}
             {activeTab === 'profile' && (
               <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-[#E8E2D5] space-y-6">

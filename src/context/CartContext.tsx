@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { CartItem, Product, Coupon } from '../types';
 import { apiService } from '../services/api';
 import { useToast } from './ToastContext';
+import { useAuth } from './AuthContext';
 
 interface CartContextType {
   items: CartItem[];
@@ -24,6 +25,9 @@ const CART_STORAGE_KEY = 'lumiere_cart_items';
 const COUPON_STORAGE_KEY = 'lumiere_cart_coupon';
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const prevUserIdRef = useRef<string | undefined>(user?._id);
+
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
@@ -44,13 +48,50 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const { showToast } = useToast();
 
+  // Handle user change: load user cart when logging in
+  useEffect(() => {
+    if (user?._id && user._id !== prevUserIdRef.current) {
+      try {
+        const savedUserCart = localStorage.getItem(`lumiere_cart_${user._id}`);
+        if (savedUserCart) {
+          const parsed = JSON.parse(savedUserCart);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setItems(parsed);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    prevUserIdRef.current = user?._id;
+  }, [user]);
+
+  // Handle logout event: clean up cart completely
+  useEffect(() => {
+    const handleLogout = () => {
+      setItems([]);
+      setAppliedCoupon(null);
+      localStorage.removeItem(CART_STORAGE_KEY);
+      localStorage.removeItem(COUPON_STORAGE_KEY);
+    };
+
+    window.addEventListener('lumiere:logout', handleLogout);
+    return () => {
+      window.removeEventListener('lumiere:logout', handleLogout);
+    };
+  }, []);
+
+  // Sync active cart to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+      if (user?._id) {
+        localStorage.setItem(`lumiere_cart_${user._id}`, JSON.stringify(items));
+      }
     } catch (e) {
       console.error(e);
     }
-  }, [items]);
+  }, [items, user]);
 
   useEffect(() => {
     try {
@@ -95,9 +136,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
+    const resolvedSize =
+      selectedSize ||
+      product.size ||
+      (product.availableSizes && product.availableSizes.length > 0 ? product.availableSizes[0] : undefined);
+    const resolvedMaterial = selectedMaterial || product.material;
+
     setItems((prev) => {
       const existingIndex = prev.findIndex(
-        (i) => i.product._id === product._id && i.selectedSize === selectedSize
+        (i) =>
+          i.product._id === product._id &&
+          (i.selectedSize || i.size || '') === (resolvedSize || '') &&
+          (i.selectedMaterial || '') === (resolvedMaterial || '')
       );
 
       if (existingIndex > -1) {
@@ -107,7 +157,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return prev;
         }
         const updated = [...prev];
-        updated[existingIndex].quantity = newQty;
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: newQty,
+          selectedSize: resolvedSize,
+          size: resolvedSize,
+          selectedMaterial: resolvedMaterial,
+        };
         return updated;
       }
 
@@ -116,8 +172,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         {
           product,
           quantity: Math.min(quantity, product.stock),
-          selectedSize: selectedSize || product.size || (product.availableSizes ? product.availableSizes[0] : undefined),
-          selectedMaterial: selectedMaterial || product.material,
+          selectedSize: resolvedSize,
+          size: resolvedSize,
+          selectedMaterial: resolvedMaterial,
         },
       ];
     });
@@ -133,7 +190,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setItems((prev) =>
       prev.map((item) => {
-        if (item.product._id === productId && item.selectedSize === selectedSize) {
+        const matchesProduct = item.product._id === productId;
+        const currentItemSize = item.selectedSize || item.size;
+        const sizeMatches = selectedSize === undefined || currentItemSize === selectedSize;
+
+        if (matchesProduct && sizeMatches) {
           if (quantity > item.product.stock) {
             showToast(`Rất tiếc, kho chỉ còn ${item.product.stock} sản phẩm!`, 'error');
             return item;
@@ -147,7 +208,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const removeItem = (productId: string, selectedSize?: string) => {
     setItems((prev) =>
-      prev.filter((i) => !(i.product._id === productId && i.selectedSize === selectedSize))
+      prev.filter((i) => {
+        const matchesProduct = i.product._id === productId;
+        const currentItemSize = i.selectedSize || i.size;
+        const sizeMatches = selectedSize === undefined || currentItemSize === selectedSize;
+        return !(matchesProduct && sizeMatches);
+      })
     );
     showToast('Đã xóa sản phẩm khỏi giỏ hàng', 'info');
   };
@@ -155,6 +221,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearCart = () => {
     setItems([]);
     setAppliedCoupon(null);
+    localStorage.removeItem(CART_STORAGE_KEY);
+    localStorage.removeItem(COUPON_STORAGE_KEY);
+    if (user?._id) {
+      localStorage.removeItem(`lumiere_cart_${user._id}`);
+    }
   };
 
   const applyCoupon = async (code: string): Promise<boolean> => {

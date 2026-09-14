@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { 
-  ShieldCheck, 
-  Truck, 
-  CreditCard, 
-  QrCode, 
-  Banknote, 
-  Wallet, 
-  Lock, 
-  ArrowLeft, 
-  Check, 
+import {
+  ShieldCheck,
+  Truck,
+  CreditCard,
+  QrCode,
+  Banknote,
+  Wallet,
+  Lock,
+  ArrowLeft,
+  Check,
   Sparkles,
   Award,
   FileText,
@@ -38,7 +38,7 @@ export const CheckoutPage: React.FC = () => {
   const [district, setDistrict] = useState('Quận 1');
   const [note, setNote] = useState('');
   const [engravingText, setEngravingText] = useState('');
-  
+
   // Payment methods: bank_transfer, momo, zalopay, vnpay, cod
   const [paymentMethod, setPaymentMethod] = useState<string>('bank_transfer');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -131,7 +131,7 @@ export const CheckoutPage: React.FC = () => {
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        
+
         {/* Header Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <Link to="/cart" className="flex items-center gap-1 hover:text-[#997A15]">
@@ -143,10 +143,10 @@ export const CheckoutPage: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* Left Form (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            
+
             {/* Section 1: Customer & Shipping Information */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-[#E8E2D5] space-y-6">
               <h2 className="text-base font-bold font-serif text-[#0B192C] uppercase tracking-wider flex items-center gap-2 pb-3 border-b border-gray-100">
@@ -348,9 +348,8 @@ export const CheckoutPage: React.FC = () => {
 
               <div className="space-y-3">
                 {/* Method 1: Bank Transfer / VietQR */}
-                <label className={`block p-4 rounded-2xl border-2 transition-all cursor-pointer ${
-                  paymentMethod === 'bank_transfer' ? 'border-[#D4AF37] bg-[#FAF8F5]' : 'border-gray-200 hover:border-gray-300'
-                }`}>
+                <label className={`block p-4 rounded-2xl border-2 transition-all cursor-pointer ${paymentMethod === 'bank_transfer' ? 'border-[#D4AF37] bg-[#FAF8F5]' : 'border-gray-200 hover:border-gray-300'
+                  }`}>
                   <div className="flex items-center gap-3">
                     <input
                       type="radio"
@@ -388,9 +387,8 @@ export const CheckoutPage: React.FC = () => {
                 </label>
 
                 {/* Method 2: MoMo */}
-                <label className={`block p-4 rounded-2xl border-2 transition-all cursor-pointer ${
-                  paymentMethod === 'momo' ? 'border-[#D4AF37] bg-[#FAF8F5]' : 'border-gray-200 hover:border-gray-300'
-                }`}>
+                <label className={`block p-4 rounded-2xl border-2 transition-all cursor-pointer ${paymentMethod === 'momo' ? 'border-[#D4AF37] bg-[#FAF8F5]' : 'border-gray-200 hover:border-gray-300'
+                  }`}>
                   <div className="flex items-center gap-3">
                     <input
                       type="radio"
@@ -410,9 +408,8 @@ export const CheckoutPage: React.FC = () => {
                 </label>
 
                 {/* Method 3: ZaloPay */}
-                <label className={`block p-4 rounded-2xl border-2 transition-all cursor-pointer ${
-                  paymentMethod === 'zalopay' ? 'border-[#D4AF37] bg-[#FAF8F5]' : 'border-gray-200 hover:border-gray-300'
-                }`}>
+                <label className={`block p-4 rounded-2xl border-2 transition-all cursor-pointer ${paymentMethod === 'zalopay' ? 'border-[#D4AF37] bg-[#FAF8F5]' : 'border-gray-200 hover:border-gray-300'
+                  }`}>
                   <div className="flex items-center gap-3">
                     <input
                       type="radio"
@@ -432,9 +429,8 @@ export const CheckoutPage: React.FC = () => {
                 </label>
 
                 {/* Method 4: VNPay */}
-                <label className={`block p-4 rounded-2xl border-2 transition-all cursor-pointer ${
-                  paymentMethod === 'vnpay' ? 'border-[#D4AF37] bg-[#FAF8F5]' : 'border-gray-200 hover:border-gray-300'
-                }`}>
+                <label className={`block p-4 rounded-2xl border-2 transition-all cursor-pointer ${paymentMethod === 'vnpay' ? 'border-[#D4AF37] bg-[#FAF8F5]' : 'border-gray-200 hover:border-gray-300'
+                  }`}>
                   <div className="flex items-center gap-3">
                     <input
                       type="radio"
@@ -454,9 +450,8 @@ export const CheckoutPage: React.FC = () => {
                 </label>
 
                 {/* Method 5: COD */}
-                <label className={`block p-4 rounded-2xl border-2 transition-all cursor-pointer ${
-                  paymentMethod === 'cod' ? 'border-[#D4AF37] bg-[#FAF8F5]' : 'border-gray-200 hover:border-gray-300'
-                }`}>
+                <label className={`block p-4 rounded-2xl border-2 transition-all cursor-pointer ${paymentMethod === 'cod' ? 'border-[#D4AF37] bg-[#FAF8F5]' : 'border-gray-200 hover:border-gray-300'
+                  }`}>
                   <div className="flex items-center gap-3">
                     <input
                       type="radio"

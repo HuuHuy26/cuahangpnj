@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
-import { 
-  CheckCircle2, 
-  Package, 
-  Truck, 
-  QrCode, 
-  Copy, 
-  ShieldCheck, 
-  ArrowRight, 
-  Diamond, 
-  Phone, 
-  FileCheck, 
-  Printer, 
-  Wallet, 
-  CreditCard, 
+import {
+  CheckCircle2,
+  Package,
+  Truck,
+  QrCode,
+  Copy,
+  ShieldCheck,
+  ArrowRight,
+  Diamond,
+  Phone,
+  FileCheck,
+  Printer,
+  Wallet,
+  CreditCard,
   Receipt,
   Check
 } from 'lucide-react';
@@ -86,7 +86,7 @@ export const OrderSuccessPage: React.FC = () => {
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        
+
         {/* Success Banner */}
         <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-xs border border-[#E8E2D5] text-center space-y-4">
           <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-200">
