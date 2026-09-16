@@ -9,6 +9,8 @@ interface CartContextType {
   itemCount: number;
   subtotal: number;
   discount: number;
+  vatRate: number;
+  vatAmount: number;
   shippingFee: number;
   total: number;
   appliedCoupon: Coupon | null;
@@ -125,9 +127,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
+  // VAT 10% on subtotal after discount
+  const subtotalAfterDiscount = Math.max(0, subtotal - discount);
+  const vatRate = 10;
+  const vatAmount = items.length > 0 ? Math.round(subtotalAfterDiscount * 0.10) : 0;
+
   // Free shipping on luxury orders over 50.000.000 VNĐ
   const shippingFee = items.length > 0 ? (subtotal > 50000000 ? 0 : 150000) : 0;
-  const total = Math.max(0, subtotal - discount + shippingFee);
+  const total = items.length > 0 ? (subtotalAfterDiscount + vatAmount + shippingFee) : 0;
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const addItem = (product: Product, quantity = 1, selectedSize?: string, selectedMaterial?: string) => {
@@ -256,6 +263,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         itemCount,
         subtotal,
         discount,
+        vatRate,
+        vatAmount,
         shippingFee,
         total,
         appliedCoupon,

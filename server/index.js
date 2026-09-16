@@ -230,26 +230,29 @@ app.get('/api/orders/:orderCodeOrId', async (req, res) => {
 
 app.post('/api/orders', async (req, res) => {
   try {
-    const orderCode = '3AE-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+    const orderCode = req.body.orderCode || ('3AE-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000));
     const newId = req.body._id || 'ord-' + Date.now();
 
     // Calculate VAT (10%)
     const subtotal = Number(req.body.subtotal) || 0;
     const discount = Number(req.body.discount) || 0;
-    const vatRate = 10;
-    const vatAmount = Math.round((subtotal - discount) * 0.10);
+    const subtotalAfterDiscount = Math.max(0, subtotal - discount);
+    const vatRate = req.body.vatRate !== undefined ? Number(req.body.vatRate) : 10;
+    const vatAmount = req.body.vatAmount !== undefined ? Number(req.body.vatAmount) : Math.round(subtotalAfterDiscount * (vatRate / 100));
     const shippingFee = Number(req.body.shippingFee) || 0;
-    const total = (subtotal - discount) + vatAmount + shippingFee;
+    const total = subtotalAfterDiscount + vatAmount + shippingFee;
 
     const orderData = {
       ...req.body,
       _id: newId,
       orderCode,
       subtotal,
+      discount,
+      shippingFee,
       vatRate,
       vatAmount,
       total,
-      timeline: [
+      timeline: req.body.timeline && req.body.timeline.length > 0 ? req.body.timeline : [
         { status: 'Chờ xác nhận', time: new Date().toISOString(), description: 'Đơn hàng được khởi tạo thành công.' }
       ]
     };
@@ -278,6 +281,16 @@ app.put('/api/orders/:id/status', async (req, res) => {
 
     await order.save();
     res.json({ success: true, message: 'Cập nhật trạng thái thành công', data: order });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/orders/:id', async (req, res) => {
+  try {
+    const order = await Order.findByIdAndDelete(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng' });
+    res.json({ success: true, message: 'Đã xóa đơn hàng thành công' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -333,6 +346,20 @@ app.post('/api/auth/send-otp', async (req, res) => {
     const { target, type = 'REGISTER' } = req.body;
     if (!target) return res.status(400).json({ success: false, message: 'Vui lòng cung cấp số điện thoại hoặc email!' });
 
+    // Ràng buộc số điện thoại khi đăng ký
+    if (type === 'REGISTER') {
+      const cleanPhone = (target || '').trim();
+      if (/[^0-9]/.test(cleanPhone)) {
+        return res.status(400).json({ success: false, message: 'Số điện thoại không được chứa chữ cái hoặc ký tự đặc biệt!' });
+      }
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({ success: false, message: `Số điện thoại phải có đúng 10 chữ số (hiện tại có ${cleanPhone.length} số)!` });
+      }
+      if (!cleanPhone.startsWith('0')) {
+        return res.status(400).json({ success: false, message: 'Số điện thoại phải bắt đầu bằng chữ số 0 (ví dụ: 0912345678)!' });
+      }
+    }
+
     // Generate random 6-digit OTP
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
@@ -385,6 +412,17 @@ app.post('/api/auth/verify-otp', async (req, res) => {
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, phone, password, otp } = req.body;
+
+    const cleanPhone = (phone || '').trim();
+    if (/[^0-9]/.test(cleanPhone)) {
+      return res.status(400).json({ success: false, message: 'Số điện thoại không được chứa chữ cái hoặc ký tự đặc biệt!' });
+    }
+    if (cleanPhone.length !== 10) {
+      return res.status(400).json({ success: false, message: `Số điện thoại phải có đúng 10 chữ số (hiện tại có ${cleanPhone.length} số)!` });
+    }
+    if (!cleanPhone.startsWith('0')) {
+      return res.status(400).json({ success: false, message: 'Số điện thoại phải bắt đầu bằng chữ số 0!' });
+    }
 
     // Check if user already exists
     const existing = await User.findOne({ $or: [{ email: email.toLowerCase() }, { phone }] });

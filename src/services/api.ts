@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Product, Category, Order, User, Coupon, Banner, Review, CartItem, ShippingAddress, OrderStatus } from '../types';
+import { validatePhoneNumber } from '../utils/validators';
 import {
   INITIAL_PRODUCTS,
   INITIAL_CATEGORIES,
@@ -44,6 +45,36 @@ const initStorage = () => {
   }
   if (!localStorage.getItem(STORAGE_KEYS.ORDERS)) {
     localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(INITIAL_ORDERS));
+  } else {
+    // Tự động chuẩn hóa đơn hàng đã lưu trong localStorage để luôn cộng đủ thuế VAT 10%
+    try {
+      const storedOrders = getStored<Order[]>(STORAGE_KEYS.ORDERS, []);
+      let ordersMigrated = false;
+      const updatedOrders = storedOrders.map((ord) => {
+        const subtotalAfterDiscount = Math.max(0, (ord.subtotal || 0) - (ord.discount || 0));
+        const vatRate = ord.vatRate !== undefined ? ord.vatRate : 10;
+        const vatAmount = ord.vatAmount !== undefined ? ord.vatAmount : Math.round(subtotalAfterDiscount * (vatRate / 100));
+        const shippingFee = ord.shippingFee || 0;
+        const correctTotal = subtotalAfterDiscount + vatAmount + shippingFee;
+
+        if (ord.vatAmount === undefined || ord.total !== correctTotal) {
+          ordersMigrated = true;
+          return {
+            ...ord,
+            vatRate,
+            vatAmount,
+            total: correctTotal,
+          };
+        }
+        return ord;
+      });
+
+      if (ordersMigrated) {
+        setStored(STORAGE_KEYS.ORDERS, updatedOrders);
+      }
+    } catch (e) {
+      console.error('Error migrating orders VAT in localStorage', e);
+    }
   }
   if (!localStorage.getItem(STORAGE_KEYS.COUPONS)) {
     localStorage.setItem(STORAGE_KEYS.COUPONS, JSON.stringify(INITIAL_COUPONS));
@@ -112,10 +143,17 @@ export const apiService = {
   // Authentication
   auth: {
     async register(data: { name: string; email: string; phone: string; password: string }) {
+      const phoneValidation = validatePhoneNumber(data.phone);
+      if (!phoneValidation.isValid) {
+        throw new Error(phoneValidation.message);
+      }
       await new Promise(r => setTimeout(r, 400));
       const users = getStored<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
       if (users.some(u => u.email.toLowerCase() === data.email.toLowerCase())) {
         throw new Error('Email này đã được đăng ký trong hệ thống!');
+      }
+      if (users.some(u => u.phone === data.phone.trim())) {
+        throw new Error('Số điện thoại này đã được đăng ký trong hệ thống!');
       }
       const newUser: User = {
         _id: 'usr-' + Date.now(),
@@ -223,10 +261,19 @@ export const apiService = {
     },
 
     async sendOtp(target: string, type: 'REGISTER' | 'RESET_PASSWORD' = 'REGISTER') {
+      if (type === 'REGISTER') {
+        const phoneValidation = validatePhoneNumber(target);
+        if (!phoneValidation.isValid) {
+          throw new Error(phoneValidation.message);
+        }
+      }
       try {
         const res = await apiClient.post('/auth/send-otp', { target, type });
         return res.data;
-      } catch {
+      } catch (err: any) {
+        if (err.response?.data?.message) {
+          throw new Error(err.response.data.message);
+        }
         // Fallback simulation
         await new Promise(r => setTimeout(r, 400));
         const demoOtp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -479,6 +526,14 @@ export const apiService = {
   // Orders
   orders: {
     async getAll(userId?: string) {
+      try {
+        const res = await apiClient.get('/orders', { params: userId ? { userId } : {} });
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          return res.data;
+        }
+      } catch {
+        // Fallback to localStorage
+      }
       await new Promise(r => setTimeout(r, 150));
       let orders = getStored<Order[]>(STORAGE_KEYS.ORDERS, INITIAL_ORDERS);
       if (userId) {
@@ -502,12 +557,25 @@ export const apiService = {
       couponCode?: string;
       paymentMethod: 'COD' | 'BANK_TRANSFER' | 'VNPAY' | 'MOMO';
       note?: string;
+      subtotal?: number;
+      discount?: number;
+      shippingFee?: number;
+      vatRate?: number;
+      vatAmount?: number;
+      total?: number;
+      isCompanyInvoiceRequested?: boolean;
+      companyInvoice?: {
+        companyName?: string;
+        taxCode?: string;
+        companyAddress?: string;
+        invoiceEmail?: string;
+      };
     }) {
       await new Promise(r => setTimeout(r, 400));
       const products = getStored<Product[]>(STORAGE_KEYS.PRODUCTS, INITIAL_PRODUCTS);
 
       // Backend verification of prices and stock
-      let subtotal = 0;
+      let calculatedSubtotal = 0;
       const orderItems = [];
 
       for (const item of orderData.items) {
@@ -522,7 +590,7 @@ export const apiService = {
         prod.sold += item.quantity;
 
         const effectivePrice = prod.salePrice || prod.price;
-        subtotal += effectivePrice * item.quantity;
+        calculatedSubtotal += effectivePrice * item.quantity;
 
         orderItems.push({
           productId: prod._id,
@@ -536,9 +604,11 @@ export const apiService = {
         });
       }
 
+      const subtotal = orderData.subtotal !== undefined ? orderData.subtotal : calculatedSubtotal;
+
       // Check coupon
-      let discount = 0;
-      if (orderData.couponCode) {
+      let discount = orderData.discount !== undefined ? orderData.discount : 0;
+      if (orderData.couponCode && orderData.discount === undefined) {
         const coupons = getStored<Coupon[]>(STORAGE_KEYS.COUPONS, INITIAL_COUPONS);
         const coupon = coupons.find(c => c.code.toUpperCase() === orderData.couponCode?.toUpperCase() && c.status === 'active');
         if (coupon) {
@@ -558,8 +628,19 @@ export const apiService = {
       }
 
       // Free shipping over 50.000.000 VND
-      const shippingFee = subtotal > 50000000 ? 0 : 150000;
-      const total = Math.max(0, subtotal - discount + shippingFee);
+      const shippingFee = orderData.shippingFee !== undefined
+        ? orderData.shippingFee
+        : (subtotal > 50000000 ? 0 : 150000);
+
+      // VAT 10% calculated on subtotal after discount
+      const subtotalAfterDiscount = Math.max(0, subtotal - discount);
+      const vatRate = orderData.vatRate !== undefined ? orderData.vatRate : 10;
+      const vatAmount = orderData.vatAmount !== undefined
+        ? orderData.vatAmount
+        : Math.round(subtotalAfterDiscount * (vatRate / 100));
+
+      // Grand Total = Subtotal after discount + VAT 10% + Shipping Fee
+      const total = subtotalAfterDiscount + vatAmount + shippingFee;
 
       const newOrder: Order = {
         _id: 'ord-' + Date.now(),
@@ -572,10 +653,14 @@ export const apiService = {
         discount,
         couponCode: orderData.couponCode,
         shippingFee,
+        vatRate,
+        vatAmount,
         total,
         paymentMethod: orderData.paymentMethod,
-        paymentStatus: orderData.paymentMethod === 'BANK_TRANSFER' ? 'Chưa thanh toán' : 'Chưa thanh toán',
+        paymentStatus: 'Chưa thanh toán',
         orderStatus: 'Chờ xác nhận',
+        isCompanyInvoiceRequested: orderData.isCompanyInvoiceRequested || false,
+        companyInvoice: orderData.companyInvoice,
         note: orderData.note,
         timeline: [
           { status: 'Chờ xác nhận', time: new Date().toISOString(), description: 'Đơn hàng mới được tạo trên hệ thống.' }
@@ -583,6 +668,13 @@ export const apiService = {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
+
+      // Try sync with API server if available
+      try {
+        await apiClient.post('/orders', newOrder);
+      } catch {
+        // Fallback to localStorage mode
+      }
 
       // Save updated products stock
       setStored(STORAGE_KEYS.PRODUCTS, products);
@@ -596,12 +688,18 @@ export const apiService = {
     },
 
     async updateStatus(orderId: string, status: OrderStatus, note?: string) {
+      try {
+        await apiClient.put(`/orders/${orderId}/status`, { status, note });
+      } catch {
+        // Fallback to localStorage
+      }
       const orders = getStored<Order[]>(STORAGE_KEYS.ORDERS, INITIAL_ORDERS);
       const index = orders.findIndex(o => o._id === orderId);
       if (index === -1) throw new Error('Không tìm thấy đơn hàng');
 
       const currentOrder = orders[index];
       currentOrder.orderStatus = status;
+      (currentOrder as any).status = status; // Đảm bảo tương thích với cả o.status
       currentOrder.updatedAt = new Date().toISOString();
       if (!currentOrder.timeline) currentOrder.timeline = [];
       currentOrder.timeline.push({
@@ -616,6 +714,18 @@ export const apiService = {
 
       setStored(STORAGE_KEYS.ORDERS, orders);
       return { success: true, message: 'Cập nhật trạng thái thành công', data: currentOrder };
+    },
+
+    async delete(orderId: string) {
+      try {
+        await apiClient.delete(`/orders/${orderId}`);
+      } catch {
+        // Fallback to localStorage
+      }
+      let orders = getStored<Order[]>(STORAGE_KEYS.ORDERS, INITIAL_ORDERS);
+      orders = orders.filter(o => o._id !== orderId);
+      setStored(STORAGE_KEYS.ORDERS, orders);
+      return { success: true, message: 'Đã xóa đơn hàng thành công' };
     },
 
     async cancelOrder(orderId: string, reason?: string) {

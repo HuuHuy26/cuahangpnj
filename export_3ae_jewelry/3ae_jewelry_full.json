@@ -1,0 +1,583 @@
+{
+  "meta": {
+    "databaseName": "3ae_jewelry",
+    "exportedAt": "2026-09-16T02:26:36.000Z",
+    "totalCollections": 9
+  },
+  "data": {
+    "coupons": [
+      {
+        "_id": "coup-1",
+        "code": "3AE2026",
+        "discountType": "percentage",
+        "discountValue": 5,
+        "minOrderValue": 20000000,
+        "maxDiscount": 5000000,
+        "expiryDate": "2026-12-31",
+        "usageLimit": 100,
+        "usedCount": 18,
+        "status": "active",
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.049Z",
+        "updatedAt": "2026-08-26T03:32:17.049Z"
+      },
+      {
+        "_id": "coup-2",
+        "code": "DIAMOND5M",
+        "discountType": "fixed",
+        "discountValue": 5000000,
+        "minOrderValue": 100000000,
+        "expiryDate": "2026-12-31",
+        "usageLimit": 50,
+        "usedCount": 12,
+        "status": "active",
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.049Z",
+        "updatedAt": "2026-08-26T03:32:17.049Z"
+      },
+      {
+        "_id": "coup-3",
+        "code": "WEDDINGVIP",
+        "discountType": "percentage",
+        "discountValue": 8,
+        "minOrderValue": 40000000,
+        "maxDiscount": 8000000,
+        "expiryDate": "2026-09-30",
+        "usageLimit": 30,
+        "usedCount": 9,
+        "status": "active",
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.049Z",
+        "updatedAt": "2026-08-26T03:32:17.049Z"
+      }
+    ],
+    "users": [
+      {
+        "_id": "usr-admin",
+        "name": "Quản Trị Viên 3AE",
+        "email": "admin@3ae.vn",
+        "phone": "0901234567",
+        "password": "Admin@123",
+        "address": "Toà nhà 3AE Tower, 128 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh",
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+        "role": "admin",
+        "isPhoneVerified": true,
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.049Z",
+        "updatedAt": "2026-08-26T03:32:17.049Z"
+      },
+      {
+        "_id": "usr-customer-1",
+        "name": "Nguyễn Thuỳ Linh",
+        "email": "linh.nguyen@gmail.com",
+        "phone": "0988776655",
+        "password": "Customer@123",
+        "address": "Căn hộ 1804, Vinhomes Golden River, Bến Nghé, Quận 1, TP. Hồ Chí Minh",
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+        "role": "customer",
+        "isPhoneVerified": true,
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.049Z",
+        "updatedAt": "2026-08-26T03:32:17.049Z"
+      },
+      {
+        "_id": "usr-customer-2",
+        "name": "Nguyễn Hữu Huy",
+        "email": "huuhuy123@gmail.com",
+        "phone": "0969085706",
+        "password": "Huy@123",
+        "address": "Biệt thự B2-12, KĐT Ciputra, Tây Hồ, Hà Nội",
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+        "role": "customer",
+        "isPhoneVerified": true,
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.049Z",
+        "updatedAt": "2026-08-26T03:32:17.049Z"
+      }
+    ],
+    "otps": [],
+    "orders": [
+      {
+        "_id": "ord-1001",
+        "orderCode": "3AE-2026-8899",
+        "userId": "usr-customer-1",
+        "customerInfo": {
+          "fullName": "Nguyễn Thuỳ Linh",
+          "phone": "0988776655",
+          "email": "linh.nguyen@gmail.com"
+        },
+        "shippingAddress": {
+          "fullName": "Nguyễn Thuỳ Linh",
+          "phone": "0988776655",
+          "email": "linh.nguyen@gmail.com",
+          "streetAddress": "Căn hộ 1804, Vinhomes Golden River",
+          "ward": "Bến Nghé",
+          "district": "Quận 1",
+          "province": "TP. Hồ Chí Minh"
+        },
+        "items": [
+          {
+            "productId": "prod-solitaire-crown-1",
+            "productName": "Nhẫn Kim Cương Solitaire Crown 1.2ct",
+            "productSku": "3AE-R-SOL-01",
+            "productImage": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
+            "price": 92000000,
+            "quantity": 1,
+            "size": "8",
+            "material": "Vàng Trắng 18K"
+          }
+        ],
+        "subtotal": 92000000,
+        "vatAmount": 8740000,
+        "vatRate": 10,
+        "discount": 4600000,
+        "couponCode": "3AE2026",
+        "shippingFee": 0,
+        "total": 96140000,
+        "paymentMethod": "BANK_TRANSFER",
+        "paymentStatus": "Đã thanh toán",
+        "orderStatus": "Đang giao hàng",
+        "isCompanyInvoiceRequested": true,
+        "companyInvoice": {
+          "companyName": "TẬP ĐOÀN ĐẦU TƯ & TÀI CHÍNH GOLDEN RIVER",
+          "taxCode": "0314567890",
+          "companyAddress": "Tầng 12, Tòa nhà Bitexco, Quận 1, TP. Hồ Chí Minh",
+          "invoiceEmail": "ketoan@goldenriver.vn"
+        },
+        "note": "Giao hàng bằng hộp quà nhung cao cấp và thẻ bảo hành GIA.",
+        "timeline": [
+          {
+            "status": "Chờ xác nhận",
+            "time": "2026-02-20T10:00:00Z",
+            "description": "Đơn hàng được khởi tạo thành công."
+          },
+          {
+            "status": "Đã xác nhận",
+            "time": "2026-02-20T10:15:00Z",
+            "description": "Chuyên viên tư vấn xác nhận thông tin đơn hàng."
+          },
+          {
+            "status": "Đang chuẩn bị",
+            "time": "2026-02-20T14:30:00Z",
+            "description": "Kiểm tra chất lượng vàng và niêm phong giấy kiểm định GIA."
+          },
+          {
+            "status": "Đang giao hàng",
+            "time": "2026-02-21T08:00:00Z",
+            "description": "Đơn vị vận chuyển bọc thép bảo hiểm đang tiến hành giao."
+          }
+        ],
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.051Z",
+        "updatedAt": "2026-08-26T03:32:17.051Z"
+      }
+    ],
+    "products": [
+      {
+        "_id": "prod-solitaire-crown-1",
+        "name": "Nhẫn Kim Cương Solitaire Crown 1.2ct",
+        "sku": "3AE-R-SOL-01",
+        "slug": "nhan-kim-cuong-solitaire-crown-1-2ct",
+        "categoryId": "cat-nhan-cau-hon",
+        "categoryName": "Nhẫn Cầu Hôn",
+        "price": 92000000,
+        "salePrice": 87400000,
+        "discountPercent": 5,
+        "images": [
+          "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1598560917505-59a3ad559071?auto=format&fit=crop&w=800&q=80"
+        ],
+        "description": "Tuyệt tác nhẫn cầu hôn đính viên chủ 1.2 Carat giác cắt Round Brilliant hoàn hảo 3X Excellent, thiết kế 6 chấu vương miện hoàng gia.",
+        "details": "Vàng trắng 18K cao cấp kết hợp viên kim cương tự nhiên 1.2ct nước D độ tinh khiết VVS1.",
+        "carat": 1.2,
+        "cut": "Excellent",
+        "color": "D",
+        "clarity": "VVS1",
+        "certificate": "GIA",
+        "material": "Vàng Trắng 18K",
+        "gender": "women",
+        "collectionType": "Royal Solitaire",
+        "inStock": true,
+        "stockCount": 5,
+        "featured": true,
+        "rating": 5,
+        "reviewsCount": 14,
+        "tags": [
+          "Cầu hôn",
+          "Solitaire",
+          "Kim cương GIA",
+          "Vàng 18K"
+        ],
+        "sizes": [
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12"
+        ],
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.044Z",
+        "updatedAt": "2026-08-26T03:32:17.044Z"
+      },
+      {
+        "_id": "prod-halo-eternity-2",
+        "name": "Nhẫn Kim Cương Halo Eternity 1.5ct",
+        "sku": "3AE-R-HALO-02",
+        "slug": "nhan-kim-cuong-halo-eternity-1-5ct",
+        "categoryId": "cat-nhan-kim-cuong",
+        "categoryName": "Nhẫn Kim Cương",
+        "price": 145000000,
+        "discountPercent": 0,
+        "images": [
+          "https://images.unsplash.com/photo-1598560917505-59a3ad559071?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80"
+        ],
+        "description": "Hào quang rực rỡ với đai kim cương tấm pavé bao quanh viên chủ Cushion Cut 1.5 Carat.",
+        "details": "Chất liệu Vàng Trắng 18K và Platinum tuyển chọn, giác cắt giác Cushion tinh mỹ.",
+        "carat": 1.5,
+        "cut": "Excellent",
+        "color": "E",
+        "clarity": "VVS2",
+        "certificate": "GIA",
+        "material": "Vàng Trắng 18K",
+        "gender": "women",
+        "collectionType": "Aura Halo",
+        "inStock": true,
+        "stockCount": 3,
+        "featured": true,
+        "rating": 5,
+        "reviewsCount": 9,
+        "tags": [
+          "Halo",
+          "Vàng Trắng",
+          "Kim cương 1.5ct"
+        ],
+        "sizes": [
+          "7",
+          "8",
+          "9",
+          "10",
+          "11"
+        ],
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.045Z",
+        "updatedAt": "2026-08-26T03:32:17.045Z"
+      },
+      {
+        "_id": "prod-pendant-lumiere-3",
+        "name": "Dây Chuyền Kim Cương Etoile 0.8ct",
+        "sku": "3AE-N-ETOILE-03",
+        "slug": "day-chuyen-kim-cuong-etoile-0-8ct",
+        "categoryId": "cat-day-chuyen",
+        "categoryName": "Dây Chuyền & Mặt Dây",
+        "price": 58000000,
+        "salePrice": 55100000,
+        "discountPercent": 5,
+        "images": [
+          "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80"
+        ],
+        "description": "Thiết kế giọt sương mai đính viên kim cương Round 0.8 Carat nước D tinh khiết.",
+        "details": "Mặt dây chuyền vàng trắng 18K Italy thanh mảnh, ôm trọn viên kim cương rực sáng.",
+        "carat": 0.8,
+        "cut": "Excellent",
+        "color": "D",
+        "clarity": "VVS1",
+        "certificate": "GIA",
+        "material": "Vàng Trắng 18K",
+        "gender": "women",
+        "collectionType": "Etoile Star",
+        "inStock": true,
+        "stockCount": 8,
+        "featured": true,
+        "rating": 5,
+        "reviewsCount": 18,
+        "tags": [
+          "Dây chuyền",
+          "Kim cương 0.8ct",
+          "GIA"
+        ],
+        "sizes": [
+          "40cm",
+          "42cm",
+          "45cm"
+        ],
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.045Z",
+        "updatedAt": "2026-08-26T03:32:17.045Z"
+      },
+      {
+        "_id": "prod-earring-brilliant-4",
+        "name": "Bông Tai Kim Cương Brilliant Studs 1.0ct Cặp",
+        "sku": "3AE-E-STUDS-04",
+        "slug": "bong-tai-kim-cuong-brilliant-studs-1-0ct",
+        "categoryId": "cat-bong-tai",
+        "categoryName": "Bông Tai Kim Cương",
+        "price": 68000000,
+        "discountPercent": 0,
+        "images": [
+          "https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=800&q=80"
+        ],
+        "description": "Cặp bông tai nụ kim cương kinh điển 4 chấu, mỗi bên 0.5 Carat nước E sạch VS1.",
+        "details": "Chất liệu Vàng Trắng 18K hoặc Vàng Vàng 18K.",
+        "carat": 1,
+        "cut": "Excellent",
+        "color": "E",
+        "clarity": "VS1",
+        "certificate": "GIA",
+        "material": "Vàng Trắng 18K",
+        "gender": "women",
+        "collectionType": "Classic Studs",
+        "inStock": true,
+        "stockCount": 6,
+        "featured": false,
+        "rating": 5,
+        "reviewsCount": 7,
+        "tags": [
+          "Bông tai",
+          "Kim cương nụ",
+          "GIA"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ],
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.045Z",
+        "updatedAt": "2026-08-26T03:32:17.045Z"
+      }
+    ],
+    "categories": [
+      {
+        "_id": "cat-nhan-kim-cuong",
+        "name": "Nhẫn Kim Cương",
+        "slug": "nhan-kim-cuong",
+        "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80",
+        "description": "Biểu tượng của tình yêu vĩnh cửu và sự gắn kết trường tồn.",
+        "order": 1,
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.048Z",
+        "updatedAt": "2026-08-26T03:32:17.048Z"
+      },
+      {
+        "_id": "cat-nhan-cau-hon",
+        "name": "Nhẫn Cầu Hôn",
+        "slug": "nhan-cau-hon",
+        "image": "https://images.unsplash.com/photo-1598560917505-59a3ad559071?auto=format&fit=crop&w=600&q=80",
+        "description": "Thiết kế tinh xảo tôn vinh khoảnh khắc thiêng liêng.",
+        "order": 2,
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.048Z",
+        "updatedAt": "2026-08-26T03:32:17.048Z"
+      },
+      {
+        "_id": "cat-nhan-cuoi",
+        "name": "Nhẫn Cưới",
+        "slug": "nhan-cuoi",
+        "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80",
+        "description": "Cặp nhẫn tín vật hẹn ước hạnh phúc lứa đôi trọn vẹn.",
+        "order": 3,
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.048Z",
+        "updatedAt": "2026-08-26T03:32:17.048Z"
+      },
+      {
+        "_id": "cat-day-chuyen",
+        "name": "Dây Chuyền & Mặt Dây",
+        "slug": "day-chuyen",
+        "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80",
+        "description": "Điểm nhấn quý phái tôn vinh nét đẹp kiêu sa.",
+        "order": 4,
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.048Z",
+        "updatedAt": "2026-08-26T03:32:17.048Z"
+      },
+      {
+        "_id": "cat-bong-tai",
+        "name": "Bông Tai Kim Cương",
+        "slug": "bong-tai",
+        "image": "https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=600&q=80",
+        "description": "Ánh sáng lấp lánh nâng tầm nét thanh lịch gương mặt.",
+        "order": 5,
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.048Z",
+        "updatedAt": "2026-08-26T03:32:17.048Z"
+      },
+      {
+        "_id": "cat-vong-tay",
+        "name": "Vòng & Lắc Tay",
+        "slug": "vong-tay",
+        "image": "https://images.unsplash.com/photo-1611591475155-4286fa292e7a?auto=format&fit=crop&w=600&q=80",
+        "description": "Sự duyên dáng uyển chuyển nơi cổ tay quý phái.",
+        "order": 6,
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.048Z",
+        "updatedAt": "2026-08-26T03:32:17.048Z"
+      },
+      {
+        "_id": "cat-kim-cuong-vien",
+        "name": "Kim Cương Viên GIA",
+        "slug": "kim-cuong-vien",
+        "image": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80",
+        "description": "Kim cương tự nhiên chứng nhận quốc tế GIA cao cấp nhất.",
+        "order": 7,
+        "__v": 0,
+        "createdAt": "2026-08-26T03:32:17.048Z",
+        "updatedAt": "2026-08-26T03:32:17.048Z"
+      }
+    ],
+    "banners": [
+      {
+        "_id": "ban-1",
+        "title": "Tuyệt Tác Kim Cương Độc Bản",
+        "subtitle": "Chuẩn Mực Giác Cắt Triple Excellent & Chứng Nhận GIA Quốc Tế",
+        "image": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=1600&q=85",
+        "link": "/products?category=kim-cuong-vien",
+        "buttonText": "Khám Phá Kim Cương Viên",
+        "position": "hero",
+        "status": "active",
+        "order": 1
+      },
+      {
+        "_id": "ban-2",
+        "title": "Khoảnh Khắc Cầu Hôn Vĩnh Cửu",
+        "subtitle": "Bộ sưu tập nhẫn đính hôn Solitaire & Halo vàng 18K sang trọng",
+        "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1600&q=85",
+        "link": "/products?category=nhan-kim-cuong-nu",
+        "buttonText": "Xem Bộ Sưu Tập Nhẫn",
+        "position": "hero",
+        "status": "active",
+        "order": 2
+      },
+      {
+        "_id": "ban-3",
+        "title": "Mùa Cưới Hạnh Phúc & Vu Quy",
+        "subtitle": "Ưu đãi tặng đến 5.000.000 VNĐ cho các cặp nhẫn cưới kỷ vật",
+        "image": "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1600&q=85",
+        "link": "/products?category=trang-suc-cuoi",
+        "buttonText": "Xem Nhẫn Cưới",
+        "position": "hero",
+        "status": "active",
+        "order": 3
+      }
+    ],
+    "reviews": [
+      {
+        "_id": "rev-1",
+        "productId": "prod-1",
+        "userId": "usr-customer-1",
+        "userName": "Nguyễn Thuỳ Linh",
+        "userAvatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+        "rating": 5,
+        "comment": "Viên kim cương cực kỳ sáng lửa, quét mã QR ra chứng nhận GIA chuẩn xác từng thông số. Đóng gói hộp nhung sang trọng đẳng cấp đúng chất thương hiệu lớn!",
+        "isVerifiedPurchase": true,
+        "status": "approved",
+        "createdAt": "2026-02-16T09:20:00Z"
+      },
+      {
+        "_id": "rev-2",
+        "productId": "prod-2",
+        "userId": "usr-customer-2",
+        "userName": "Trần Hoàng Nam",
+        "userAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+        "rating": 5,
+        "comment": "Tôi mua chiếc nhẫn Solitaire này để cầu hôn và bạn gái tôi vỡ òa vì xúc động. Thiết kế 6 chấu ôm trọn viên kim cương trông rất lớn và sáng rực rỡ.",
+        "isVerifiedPurchase": true,
+        "status": "approved",
+        "createdAt": "2026-02-19T14:40:00Z"
+      },
+      {
+        "_id": "rev-3",
+        "productId": "prod-5",
+        "userId": "usr-customer-1",
+        "userName": "Lê Minh Khang",
+        "rating": 5,
+        "comment": "Cặp nhẫn cưới hoàn thiện rất mượt mà, vàng 18K sắc sảo và được hỗ trợ khắc tên miễn phí rất ý nghĩa.",
+        "isVerifiedPurchase": true,
+        "status": "approved",
+        "createdAt": "2026-02-23T11:00:00Z"
+      }
+    ],
+    "stores": [
+      {
+        "_id": "store-1",
+        "code": "STORE-HN-01",
+        "name": "3AE Diamond Flagship Hà Đông",
+        "type": "Flagship Showroom",
+        "address": "Tòa nhà Diamond Tower, 47 - 48 TT16, Khu đô thị Văn Phú",
+        "ward": "Phường Phú La",
+        "district": "Quận Hà Đông",
+        "city": "Hà Nội",
+        "phone": "0868 895 658",
+        "email": "vietkhoi@diamond-jewelry.vn",
+        "openingHours": "08:30 - 21:30 (Thứ 2 - Chủ Nhật)",
+        "isFlagship": true,
+        "coordinates": {
+          "lat": 20.9575,
+          "lng": 105.7682
+        },
+        "services": [
+          "Tư vấn kim cương 1-1 phòng VIP",
+          "Kiểm định mã số cạnh kim cương GIA tại chỗ bằng kính hiển vi 40X",
+          "Thiết kế trang sức độc bản 3D Custom Made",
+          "Làm sạch & xi mạ đánh bóng trọn đời miễn phí",
+          "Thu đổi kim cương và trang sức với chính sách bảo chứng tốt nhất"
+        ],
+        "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80",
+        "status": "active"
+      },
+      {
+        "_id": "store-2",
+        "code": "STORE-HN-02",
+        "name": "3AE Diamond Boutique Keangnam Landmark 72",
+        "type": "Luxury Boutique",
+        "address": "Tầng 1 sảnh chính, Tòa tháp Keangnam Landmark 72, Đường Phạm Hùng",
+        "ward": "Phường Mễ Trì",
+        "district": "Quận Nam Từ Liêm",
+        "city": "Hà Nội",
+        "phone": "0868 895 658",
+        "email": "contact@diamond-jewelry.vn",
+        "openingHours": "09:00 - 22:00 (Thứ 2 - Chủ Nhật)",
+        "isFlagship": false,
+        "coordinates": {
+          "lat": 21.0173,
+          "lng": 105.7838
+        },
+        "services": [
+          "Trải nghiệm kim cương viên Fancy Cut (Oval, Cushion, Emerald, Pear)",
+          "Khắc laser tên riêng và lời ước hẹn trên đai nhẫn",
+          "Đặt lịch hẹn riêng tư cùng Master Jeweler",
+          "Giao nhận trang sức bọc thép bảo mật tận nơi"
+        ],
+        "image": "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?auto=format&fit=crop&w=1000&q=80",
+        "status": "active"
+      },
+      {
+        "_id": "store-3",
+        "code": "STORE-HCM-01",
+        "name": "3AE Diamond Showroom Vinhomes Golden River TP.HCM",
+        "type": "VIP Lounge & Boutique",
+        "address": "Tòa Aqua 1, Khu đô thị Vinhomes Golden River, Số 2 Tôn Đức Thắng",
+        "ward": "Phường Bến Nghé",
+        "district": "Quận 1",
+        "city": "TP. Hồ Chí Minh",
+        "phone": "1800 5454 57",
+        "email": "hcm@diamond-jewelry.vn",
+        "openingHours": "09:00 - 21:30 (Thứ 2 - Chủ Nhật)",
+        "isFlagship": false,
+        "coordinates": {
+          "lat": 10.7852,
+          "lng": 106.7088
+        },
+        "services": [
+          "Phòng thử trang sức riêng biệt chuẩn 5 sao",
+          "Bộ sưu tập nhẫn cưới & nhẫn cầu hôn Eternity mới nhất",
+          "Hỗ trợ trả góp 0% lãi suất thẻ tín dụng",
+          "Bảo hành & thu đổi toàn quốc"
+        ],
+        "image": "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=1000&q=80",
+        "status": "active"
+      }
+    ]
+  }
+}

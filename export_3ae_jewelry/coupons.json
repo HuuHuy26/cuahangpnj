@@ -1,0 +1,46 @@
+[
+  {
+    "_id": "coup-1",
+    "code": "3AE2026",
+    "discountType": "percentage",
+    "discountValue": 5,
+    "minOrderValue": 20000000,
+    "maxDiscount": 5000000,
+    "expiryDate": "2026-12-31",
+    "usageLimit": 100,
+    "usedCount": 18,
+    "status": "active",
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.049Z",
+    "updatedAt": "2026-08-26T03:32:17.049Z"
+  },
+  {
+    "_id": "coup-2",
+    "code": "DIAMOND5M",
+    "discountType": "fixed",
+    "discountValue": 5000000,
+    "minOrderValue": 100000000,
+    "expiryDate": "2026-12-31",
+    "usageLimit": 50,
+    "usedCount": 12,
+    "status": "active",
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.049Z",
+    "updatedAt": "2026-08-26T03:32:17.049Z"
+  },
+  {
+    "_id": "coup-3",
+    "code": "WEDDINGVIP",
+    "discountType": "percentage",
+    "discountValue": 8,
+    "minOrderValue": 40000000,
+    "maxDiscount": 8000000,
+    "expiryDate": "2026-09-30",
+    "usageLimit": 30,
+    "usedCount": 9,
+    "status": "active",
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.049Z",
+    "updatedAt": "2026-08-26T03:32:17.049Z"
+  }
+]

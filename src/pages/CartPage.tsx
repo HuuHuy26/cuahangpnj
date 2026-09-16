@@ -24,6 +24,8 @@ export const CartPage: React.FC = () => {
     clearCart,
     subtotal,
     discount,
+    vatAmount,
+    vatRate,
     shippingFee,
     total,
     appliedCoupon,
@@ -260,7 +262,7 @@ export const CartPage: React.FC = () => {
               {/* Cost Calculation */}
               <div className="space-y-3 pt-3 border-t border-gray-100 text-xs">
                 <div className="flex justify-between text-gray-600">
-                  <span>Tạm tính:</span>
+                  <span>Tạm tính tiền hàng:</span>
                   <span className="font-semibold text-gray-900">{formatCurrency(subtotal)}</span>
                 </div>
                 {discount > 0 && (
@@ -269,13 +271,25 @@ export const CartPage: React.FC = () => {
                     <span>-{formatCurrency(discount)}</span>
                   </div>
                 )}
+                <div className="flex justify-between text-gray-700 font-medium">
+                  <span className="flex items-center gap-1">
+                    Thuế GTGT (VAT 10%):
+                    <span className="text-[10px] text-gray-400 font-normal">Luật thuế VN</span>
+                  </span>
+                  <span className="font-semibold text-gray-900">+{formatCurrency(vatAmount)}</span>
+                </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Phí giao hàng bảo hiểm:</span>
                   <span>{shippingFee === 0 ? 'Miễn phí' : formatCurrency(shippingFee)}</span>
                 </div>
-                <div className="flex justify-between text-sm sm:text-base font-bold text-[#0B192C] pt-3 border-t border-gray-200">
-                  <span>Tổng thanh toán:</span>
-                  <span className="text-[#997A15]">{formatCurrency(total)}</span>
+                <div className="pt-3 border-t border-gray-200">
+                  <div className="flex justify-between text-sm sm:text-base font-bold text-[#0B192C]">
+                    <span>Tổng thanh toán:</span>
+                    <span className="text-[#997A15]">{formatCurrency(total)}</span>
+                  </div>
+                  <div className="text-[10px] text-gray-400 italic text-right mt-0.5">
+                    Đã bao gồm thuế GTGT (VAT 10%)
+                  </div>
                 </div>
               </div>
 

@@ -1,0 +1,79 @@
+[
+  {
+    "_id": "cat-nhan-kim-cuong",
+    "name": "Nhẫn Kim Cương",
+    "slug": "nhan-kim-cuong",
+    "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80",
+    "description": "Biểu tượng của tình yêu vĩnh cửu và sự gắn kết trường tồn.",
+    "order": 1,
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.048Z",
+    "updatedAt": "2026-08-26T03:32:17.048Z"
+  },
+  {
+    "_id": "cat-nhan-cau-hon",
+    "name": "Nhẫn Cầu Hôn",
+    "slug": "nhan-cau-hon",
+    "image": "https://images.unsplash.com/photo-1598560917505-59a3ad559071?auto=format&fit=crop&w=600&q=80",
+    "description": "Thiết kế tinh xảo tôn vinh khoảnh khắc thiêng liêng.",
+    "order": 2,
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.048Z",
+    "updatedAt": "2026-08-26T03:32:17.048Z"
+  },
+  {
+    "_id": "cat-nhan-cuoi",
+    "name": "Nhẫn Cưới",
+    "slug": "nhan-cuoi",
+    "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80",
+    "description": "Cặp nhẫn tín vật hẹn ước hạnh phúc lứa đôi trọn vẹn.",
+    "order": 3,
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.048Z",
+    "updatedAt": "2026-08-26T03:32:17.048Z"
+  },
+  {
+    "_id": "cat-day-chuyen",
+    "name": "Dây Chuyền & Mặt Dây",
+    "slug": "day-chuyen",
+    "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80",
+    "description": "Điểm nhấn quý phái tôn vinh nét đẹp kiêu sa.",
+    "order": 4,
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.048Z",
+    "updatedAt": "2026-08-26T03:32:17.048Z"
+  },
+  {
+    "_id": "cat-bong-tai",
+    "name": "Bông Tai Kim Cương",
+    "slug": "bong-tai",
+    "image": "https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=600&q=80",
+    "description": "Ánh sáng lấp lánh nâng tầm nét thanh lịch gương mặt.",
+    "order": 5,
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.048Z",
+    "updatedAt": "2026-08-26T03:32:17.048Z"
+  },
+  {
+    "_id": "cat-vong-tay",
+    "name": "Vòng & Lắc Tay",
+    "slug": "vong-tay",
+    "image": "https://images.unsplash.com/photo-1611591475155-4286fa292e7a?auto=format&fit=crop&w=600&q=80",
+    "description": "Sự duyên dáng uyển chuyển nơi cổ tay quý phái.",
+    "order": 6,
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.048Z",
+    "updatedAt": "2026-08-26T03:32:17.048Z"
+  },
+  {
+    "_id": "cat-kim-cuong-vien",
+    "name": "Kim Cương Viên GIA",
+    "slug": "kim-cuong-vien",
+    "image": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80",
+    "description": "Kim cương tự nhiên chứng nhận quốc tế GIA cao cấp nhất.",
+    "order": 7,
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.048Z",
+    "updatedAt": "2026-08-26T03:32:17.048Z"
+  }
+]

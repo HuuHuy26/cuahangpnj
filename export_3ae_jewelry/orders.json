@@ -1,0 +1,76 @@
+[
+  {
+    "_id": "ord-1001",
+    "orderCode": "3AE-2026-8899",
+    "userId": "usr-customer-1",
+    "customerInfo": {
+      "fullName": "Nguyễn Thuỳ Linh",
+      "phone": "0988776655",
+      "email": "linh.nguyen@gmail.com"
+    },
+    "shippingAddress": {
+      "fullName": "Nguyễn Thuỳ Linh",
+      "phone": "0988776655",
+      "email": "linh.nguyen@gmail.com",
+      "streetAddress": "Căn hộ 1804, Vinhomes Golden River",
+      "ward": "Bến Nghé",
+      "district": "Quận 1",
+      "province": "TP. Hồ Chí Minh"
+    },
+    "items": [
+      {
+        "productId": "prod-solitaire-crown-1",
+        "productName": "Nhẫn Kim Cương Solitaire Crown 1.2ct",
+        "productSku": "3AE-R-SOL-01",
+        "productImage": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
+        "price": 92000000,
+        "quantity": 1,
+        "size": "8",
+        "material": "Vàng Trắng 18K"
+      }
+    ],
+    "subtotal": 92000000,
+    "vatAmount": 8740000,
+    "vatRate": 10,
+    "discount": 4600000,
+    "couponCode": "3AE2026",
+    "shippingFee": 0,
+    "total": 96140000,
+    "paymentMethod": "BANK_TRANSFER",
+    "paymentStatus": "Đã thanh toán",
+    "orderStatus": "Đang giao hàng",
+    "isCompanyInvoiceRequested": true,
+    "companyInvoice": {
+      "companyName": "TẬP ĐOÀN ĐẦU TƯ & TÀI CHÍNH GOLDEN RIVER",
+      "taxCode": "0314567890",
+      "companyAddress": "Tầng 12, Tòa nhà Bitexco, Quận 1, TP. Hồ Chí Minh",
+      "invoiceEmail": "ketoan@goldenriver.vn"
+    },
+    "note": "Giao hàng bằng hộp quà nhung cao cấp và thẻ bảo hành GIA.",
+    "timeline": [
+      {
+        "status": "Chờ xác nhận",
+        "time": "2026-02-20T10:00:00Z",
+        "description": "Đơn hàng được khởi tạo thành công."
+      },
+      {
+        "status": "Đã xác nhận",
+        "time": "2026-02-20T10:15:00Z",
+        "description": "Chuyên viên tư vấn xác nhận thông tin đơn hàng."
+      },
+      {
+        "status": "Đang chuẩn bị",
+        "time": "2026-02-20T14:30:00Z",
+        "description": "Kiểm tra chất lượng vàng và niêm phong giấy kiểm định GIA."
+      },
+      {
+        "status": "Đang giao hàng",
+        "time": "2026-02-21T08:00:00Z",
+        "description": "Đơn vị vận chuyển bọc thép bảo hiểm đang tiến hành giao."
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.051Z",
+    "updatedAt": "2026-08-26T03:32:17.051Z"
+  }
+]

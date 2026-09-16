@@ -304,9 +304,14 @@ export const AdminDashboardPage: React.FC = () => {
   }
 
   // Analytics Calculations
-  const totalRevenue = orders.reduce((sum, o) => (o.orderStatus !== 'Đã hủy' ? sum + o.total : sum), 0);
+  const completedOrders = orders.filter(
+    (o) => o.orderStatus === 'Đã giao hàng' || (o as any).status === 'Đã giao hàng'
+  );
+  const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
   const totalOrdersCount = orders.length;
-  const pendingOrdersCount = orders.filter((o) => o.orderStatus === 'Chờ xác nhận').length;
+  const pendingOrdersCount = orders.filter(
+    (o) => o.orderStatus === 'Chờ xác nhận' || (o as any).status === 'Chờ xác nhận'
+  ).length;
   const totalProductsCount = products.length;
 
   // Order Status Change
@@ -314,11 +319,28 @@ export const AdminDashboardPage: React.FC = () => {
     try {
       await apiService.orders.updateStatus(orderId, newStatus as any);
       setOrders((prev) =>
-        prev.map((o) => (o._id === orderId ? { ...o, orderStatus: newStatus as any } : o))
+        prev.map((o) =>
+          o._id === orderId
+            ? { ...o, orderStatus: newStatus as any, status: newStatus as any }
+            : o
+        )
       );
       showToast(`Đã cập nhật trạng thái đơn hàng thành "${newStatus}"`, 'success');
     } catch (err) {
       showToast('Cập nhật trạng thái thất bại', 'error');
+    }
+  };
+
+  // Delete Order
+  const handleDeleteOrder = async (orderId: string, orderCode: string) => {
+    if (window.confirm(`⚠️ Quý khách có chắc chắn muốn xóa đơn hàng "${orderCode}" vĩnh viễn khỏi hệ thống?`)) {
+      try {
+        await apiService.orders.delete(orderId);
+        setOrders((prev) => prev.filter((o) => o._id !== orderId));
+        showToast(`Đã xóa đơn hàng "${orderCode}" thành công!`, 'success');
+      } catch (err) {
+        showToast('Không thể xóa đơn hàng!', 'error');
+      }
     }
   };
 
@@ -789,7 +811,7 @@ export const AdminDashboardPage: React.FC = () => {
                     <DollarSign className="w-4 h-4 text-emerald-600" />
                   </div>
                   <div className="text-xl sm:text-2xl font-bold text-[#0B192C]">{formatCurrency(totalRevenue)}</div>
-                  <div className="text-[11px] text-emerald-600 font-medium">Bao gồm {orders.filter(o => o.status === 'Đã giao hàng').length} đơn hoàn tất</div>
+                  <div className="text-[11px] text-emerald-600 font-medium">Bao gồm {completedOrders.length} đơn hoàn tất</div>
                 </div>
 
                 <div className="p-6 bg-white rounded-2xl border border-[#E8E2D5] shadow-xs space-y-2">
@@ -843,17 +865,18 @@ export const AdminDashboardPage: React.FC = () => {
                       {orders.slice(0, 5).map((ord) => (
                         <tr key={ord._id} className="hover:bg-[#FAF8F5]">
                           <td className="p-3 font-mono font-bold text-[#0B192C]">{ord.orderCode}</td>
-                          <td className="p-3 font-medium">{ord.shippingAddress.fullName}</td>
+                          <td className="p-3 font-medium">{ord.shippingAddress?.fullName || ord.customerInfo?.fullName}</td>
                           <td className="p-3 font-bold text-[#997A15]">{formatCurrency(ord.total)}</td>
                           <td className="p-3 uppercase text-[11px]">{ord.paymentMethod}</td>
                           <td className="p-3">
                             <select
-                              value={ord.status}
+                              value={ord.orderStatus || (ord as any).status || 'Chờ xác nhận'}
                               onChange={(e) => handleOrderStatusChange(ord._id, e.target.value)}
                               className="p-1.5 bg-white border border-gray-300 rounded-lg text-xs font-semibold"
                             >
                               <option value="Chờ xác nhận">Chờ xác nhận</option>
-                              <option value="Đang xử lý">Đang xử lý</option>
+                              <option value="Đã xác nhận">Đã xác nhận</option>
+                              <option value="Đang chuẩn bị">Đang chuẩn bị</option>
                               <option value="Đang giao hàng">Đang giao hàng</option>
                               <option value="Đã giao hàng">Đã giao hàng</option>
                               <option value="Đã hủy">Đã hủy</option>
@@ -861,12 +884,21 @@ export const AdminDashboardPage: React.FC = () => {
                           </td>
                           <td className="p-3 text-gray-500">{formatDate(ord.createdAt)}</td>
                           <td className="p-3 text-right">
-                            <button
-                              onClick={() => setActiveTab('orders')}
-                              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-[11px] font-semibold"
-                            >
-                              Xem
-                            </button>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => setActiveTab('orders')}
+                                className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-[11px] font-semibold cursor-pointer"
+                              >
+                                Xem
+                              </button>
+                              <button
+                                onClick={() => handleDeleteOrder(ord._id, ord.orderCode)}
+                                className="p-1 text-red-500 hover:bg-red-50 rounded cursor-pointer transition-colors"
+                                title="Xóa đơn hàng"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1045,14 +1077,23 @@ export const AdminDashboardPage: React.FC = () => {
                         </td>
                         <td className="p-3 text-gray-500 text-[11px]">{formatDate(ord.createdAt)}</td>
                         <td className="p-3 text-right">
-                          <button
-                            onClick={() => setInvoiceOrder(ord)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#FAF8F5] hover:bg-[#0B192C] hover:text-[#F4E8C1] border border-gray-300 rounded-lg font-semibold text-[11px] transition-colors cursor-pointer"
-                            title="In Hóa Đơn VAT Điện Tử"
-                          >
-                            <Printer className="w-3.5 h-3.5" />
-                            <span>In Hóa Đơn</span>
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => setInvoiceOrder(ord)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#FAF8F5] hover:bg-[#0B192C] hover:text-[#F4E8C1] border border-gray-300 rounded-lg font-semibold text-[11px] transition-colors cursor-pointer"
+                              title="In Hóa Đơn VAT Điện Tử"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              <span>In Hóa Đơn</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteOrder(ord._id, ord.orderCode)}
+                              className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg border border-red-200 cursor-pointer transition-colors"
+                              title="Xóa đơn hàng"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

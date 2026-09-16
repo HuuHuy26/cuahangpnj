@@ -113,10 +113,19 @@ export interface Order {
   discount: number;
   couponCode?: string;
   shippingFee: number;
+  vatRate?: number;
+  vatAmount?: number;
   total: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   orderStatus: OrderStatus;
+  isCompanyInvoiceRequested?: boolean;
+  companyInvoice?: {
+    companyName?: string;
+    taxCode?: string;
+    companyAddress?: string;
+    invoiceEmail?: string;
+  };
   note?: string;
   timeline?: {
     status: OrderStatus;

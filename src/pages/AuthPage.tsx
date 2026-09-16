@@ -20,6 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { apiService } from '../services/api';
 import { handleAdminPortalAccess } from '../utils/adminGuard';
+import { validatePhoneNumber } from '../utils/validators';
 
 export const AuthPage: React.FC = () => {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export const AuthPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [otpCode, setOtpCode] = useState('');
 
   // Forgot Password fields
@@ -62,9 +64,19 @@ export const AuthPage: React.FC = () => {
   }, [countdown]);
 
   const handleSendOtp = async (target: string, type: 'REGISTER' | 'RESET_PASSWORD') => {
-    if (!target.trim()) {
-      showToast('Vui lòng nhập Số điện thoại hoặc Email để nhận mã OTP', 'error');
-      return;
+    if (type === 'REGISTER') {
+      const validation = validatePhoneNumber(target);
+      if (!validation.isValid) {
+        setPhoneError(validation.message);
+        showToast(validation.message, 'error');
+        return;
+      }
+      setPhoneError('');
+    } else {
+      if (!target.trim()) {
+        showToast('Vui lòng nhập Số điện thoại hoặc Email để nhận mã OTP', 'error');
+        return;
+      }
     }
 
     setIsSendingOtp(true);
@@ -108,6 +120,18 @@ export const AuthPage: React.FC = () => {
     e.preventDefault();
     if (!name.trim() || !phone.trim() || !email.trim()) {
       showToast('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Email', 'error');
+      return;
+    }
+
+    const validation = validatePhoneNumber(phone);
+    if (!validation.isValid) {
+      setPhoneError(validation.message);
+      showToast(validation.message, 'error');
+      return;
+    }
+
+    if (!otpCode.trim()) {
+      showToast('Vui lòng bấm "Nhận mã OTP" và nhập mã xác thực 6 số để đăng ký!', 'error');
       return;
     }
 
@@ -352,16 +376,28 @@ export const AuthPage: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-gray-700">Số điện thoại *</label>
+                <label className="font-semibold text-gray-700">Số điện thoại (10 chữ số) *</label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <input
                       type="tel"
                       required
+                      maxLength={10}
                       placeholder="0912345678"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full pl-9 pr-3 py-3 bg-[#FAF8F5] border border-gray-200 rounded-xl focus:outline-none focus:border-[#C5A059]"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setPhone(val);
+                        if (val.trim()) {
+                          const v = validatePhoneNumber(val);
+                          setPhoneError(v.isValid ? '' : v.message);
+                        } else {
+                          setPhoneError('');
+                        }
+                      }}
+                      className={`w-full pl-9 pr-3 py-3 bg-[#FAF8F5] border rounded-xl focus:outline-none ${
+                        phoneError ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-[#C5A059]'
+                      }`}
                     />
                     <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   </div>
@@ -374,6 +410,9 @@ export const AuthPage: React.FC = () => {
                     {countdown > 0 ? `${countdown}s` : isSendingOtp ? 'Đang gửi...' : 'Nhận mã OTP'}
                   </button>
                 </div>
+                {phoneError && (
+                  <p className="text-[11px] text-red-500 font-medium">{phoneError}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">

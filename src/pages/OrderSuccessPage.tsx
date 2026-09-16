@@ -74,14 +74,19 @@ export const OrderSuccessPage: React.FC = () => {
     );
   }
 
-  // VietQR Napas 24/7 endpoint (MB Bank)
-  const vietQrUrl = `https://img.vietqr.io/image/mbbank-0901234567-compact2.png?amount=${order.total}&addInfo=${order.orderCode}&accountName=CTY%20CP%20KIM%20HOAN%203AE`;
-  const momoQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=2|99|0901234567|CTY%20CP%20KIM%20HOAN%203AE|admin@3ae.vn|0|0|${order.total}|${order.orderCode}|transfer_myqr`;
-  const zalopayQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=zalopay://pay?amount=${order.total}&desc=${order.orderCode}`;
-  const vnpayQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=00020101021226580010A000000727012600069704220112${order.orderCode}53037045408${order.total}5802VN62150811${order.orderCode}6304`;
+  const subtotalBeforeVat = Math.max(0, order.subtotal - (order.discount || 0));
+  const vatRate = order.vatRate !== undefined ? order.vatRate : 10;
+  const vatAmount = order.vatAmount !== undefined ? order.vatAmount : Math.round(subtotalBeforeVat * (vatRate / 100));
+  const shippingFee = order.shippingFee || 0;
+  const finalTotal = (order.vatAmount !== undefined && order.total === subtotalBeforeVat + vatAmount + shippingFee)
+    ? order.total
+    : (subtotalBeforeVat + vatAmount + shippingFee);
 
-  const subtotalBeforeVat = order.subtotal - (order.discount || 0);
-  const vatAmount = (order as any).vatAmount || Math.round(subtotalBeforeVat * 0.10);
+  // VietQR Napas 24/7 endpoint (MB Bank)
+  const vietQrUrl = `https://img.vietqr.io/image/mbbank-0901234567-compact2.png?amount=${finalTotal}&addInfo=${order.orderCode}&accountName=CTY%20CP%20KIM%20HOAN%203AE`;
+  const momoQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=2|99|0901234567|CTY%20CP%20KIM%20HOAN%203AE|admin@3ae.vn|0|0|${finalTotal}|${order.orderCode}|transfer_myqr`;
+  const zalopayQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=zalopay://pay?amount=${finalTotal}&desc=${order.orderCode}`;
+  const vnpayQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=00020101021226580010A000000727012600069704220112${order.orderCode}53037045408${finalTotal}5802VN62150811${order.orderCode}6304`;
 
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-10">
@@ -178,10 +183,10 @@ export const OrderSuccessPage: React.FC = () => {
                 <div className="p-3 bg-[#FAF8F5] rounded-xl border border-gray-200 flex justify-between items-center">
                   <div>
                     <span className="text-gray-500 text-[11px]">Số tiền cần chuyển (Đã gồm VAT 10%):</span>
-                    <div className="font-bold text-base text-[#997A15] font-mono">{formatCurrency(order.total)}</div>
+                    <div className="font-bold text-base text-[#997A15] font-mono">{formatCurrency(finalTotal)}</div>
                   </div>
                   <button
-                    onClick={() => copyToClipboard(order.total.toString(), 'Số tiền')}
+                    onClick={() => copyToClipboard(finalTotal.toString(), 'Số tiền')}
                     className="p-1.5 text-[#997A15] hover:bg-white rounded-lg border border-[#D4AF37]/40 cursor-pointer"
                     title="Sao chép"
                   >
@@ -241,7 +246,7 @@ export const OrderSuccessPage: React.FC = () => {
                 </div>
                 <div className="p-3 bg-pink-50/50 rounded-xl border border-pink-200">
                   <span className="text-gray-500 text-[11px]">Số tiền:</span>
-                  <div className="font-bold text-base text-pink-600 font-mono">{formatCurrency(order.total)}</div>
+                  <div className="font-bold text-base text-pink-600 font-mono">{formatCurrency(finalTotal)}</div>
                 </div>
                 <div className="p-3 bg-pink-50/50 rounded-xl border border-pink-200 flex justify-between items-center">
                   <div>
@@ -294,7 +299,7 @@ export const OrderSuccessPage: React.FC = () => {
                 </div>
                 <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-200">
                   <span className="text-gray-500 text-[11px]">Tổng số tiền:</span>
-                  <div className="font-bold text-base text-blue-600 font-mono">{formatCurrency(order.total)}</div>
+                  <div className="font-bold text-base text-blue-600 font-mono">{formatCurrency(finalTotal)}</div>
                 </div>
                 <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-200 flex justify-between items-center">
                   <div>
@@ -336,7 +341,7 @@ export const OrderSuccessPage: React.FC = () => {
               />
               <div className="space-y-2 text-xs text-gray-700">
                 <div>Mã giao dịch VNPAY: <strong className="font-mono text-[#0B192C]">{order.orderCode}</strong></div>
-                <div>Số tiền thanh toán: <strong className="text-base text-blue-700 font-mono">{formatCurrency(order.total)}</strong></div>
+                <div>Số tiền thanh toán: <strong className="text-base text-blue-700 font-mono">{formatCurrency(finalTotal)}</strong></div>
                 <div className="text-[11px] text-gray-500">Hệ thống sẽ tự động cập nhật trạng thái đơn sau 30 giây khi quý khách hoàn tất giao dịch.</div>
               </div>
             </div>
@@ -353,7 +358,7 @@ export const OrderSuccessPage: React.FC = () => {
               </h3>
             </div>
             <p className="text-xs text-gray-600 leading-relaxed">
-              Nhân viên giao nhận bảo an của 3AE sẽ mang kiện hàng đến tận nơi. Quý khách được quyền mở hộp niêm phong, kiểm tra giấy chứng nhận kim cương GIA và tình trạng trang sức trước khi thanh toán số tiền <strong className="text-[#997A15]">{formatCurrency(order.total)}</strong> cho nhân viên giao hàng.
+              Nhân viên giao nhận bảo an của 3AE sẽ mang kiện hàng đến tận nơi. Quý khách được quyền mở hộp niêm phong, kiểm tra giấy chứng nhận kim cương GIA và tình trạng trang sức trước khi thanh toán số tiền <strong className="text-[#997A15]">{formatCurrency(finalTotal)}</strong> cho nhân viên giao hàng.
             </p>
           </div>
         )}
@@ -429,7 +434,7 @@ export const OrderSuccessPage: React.FC = () => {
             {order.discount > 0 && <div className="text-emerald-600 font-semibold">Ưu đãi Voucher: -{formatCurrency(order.discount)}</div>}
             <div className="text-gray-700">Thuế GTGT (VAT 10%): <span className="font-mono font-bold text-gray-900">+{formatCurrency(vatAmount)}</span></div>
             <div className="text-gray-600">Phí giao hàng: <span className="text-emerald-600 font-bold">Miễn phí</span></div>
-            <div className="text-base font-bold text-[#997A15]">Tổng tiền đã gồm VAT: <span className="font-mono text-lg">{formatCurrency(order.total)}</span></div>
+            <div className="text-base font-bold text-[#997A15]">Tổng tiền đã gồm VAT: <span className="font-mono text-lg">{formatCurrency(finalTotal)}</span></div>
           </div>
         </div>
 
@@ -461,7 +466,7 @@ export const OrderSuccessPage: React.FC = () => {
       {/* VAT Invoice Printable Modal */}
       {order && (
         <InvoiceModal
-          order={order}
+          order={{ ...order, total: finalTotal, vatAmount, vatRate }}
           isOpen={isInvoiceModalOpen}
           onClose={() => setIsInvoiceModalOpen(false)}
         />

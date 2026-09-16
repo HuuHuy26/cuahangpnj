@@ -1,0 +1,175 @@
+[
+  {
+    "_id": "prod-solitaire-crown-1",
+    "name": "Nhẫn Kim Cương Solitaire Crown 1.2ct",
+    "sku": "3AE-R-SOL-01",
+    "slug": "nhan-kim-cuong-solitaire-crown-1-2ct",
+    "categoryId": "cat-nhan-cau-hon",
+    "categoryName": "Nhẫn Cầu Hôn",
+    "price": 92000000,
+    "salePrice": 87400000,
+    "discountPercent": 5,
+    "images": [
+      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1598560917505-59a3ad559071?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "Tuyệt tác nhẫn cầu hôn đính viên chủ 1.2 Carat giác cắt Round Brilliant hoàn hảo 3X Excellent, thiết kế 6 chấu vương miện hoàng gia.",
+    "details": "Vàng trắng 18K cao cấp kết hợp viên kim cương tự nhiên 1.2ct nước D độ tinh khiết VVS1.",
+    "carat": 1.2,
+    "cut": "Excellent",
+    "color": "D",
+    "clarity": "VVS1",
+    "certificate": "GIA",
+    "material": "Vàng Trắng 18K",
+    "gender": "women",
+    "collectionType": "Royal Solitaire",
+    "inStock": true,
+    "stockCount": 5,
+    "featured": true,
+    "rating": 5,
+    "reviewsCount": 14,
+    "tags": [
+      "Cầu hôn",
+      "Solitaire",
+      "Kim cương GIA",
+      "Vàng 18K"
+    ],
+    "sizes": [
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12"
+    ],
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.044Z",
+    "updatedAt": "2026-08-26T03:32:17.044Z"
+  },
+  {
+    "_id": "prod-halo-eternity-2",
+    "name": "Nhẫn Kim Cương Halo Eternity 1.5ct",
+    "sku": "3AE-R-HALO-02",
+    "slug": "nhan-kim-cuong-halo-eternity-1-5ct",
+    "categoryId": "cat-nhan-kim-cuong",
+    "categoryName": "Nhẫn Kim Cương",
+    "price": 145000000,
+    "discountPercent": 0,
+    "images": [
+      "https://images.unsplash.com/photo-1598560917505-59a3ad559071?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "Hào quang rực rỡ với đai kim cương tấm pavé bao quanh viên chủ Cushion Cut 1.5 Carat.",
+    "details": "Chất liệu Vàng Trắng 18K và Platinum tuyển chọn, giác cắt giác Cushion tinh mỹ.",
+    "carat": 1.5,
+    "cut": "Excellent",
+    "color": "E",
+    "clarity": "VVS2",
+    "certificate": "GIA",
+    "material": "Vàng Trắng 18K",
+    "gender": "women",
+    "collectionType": "Aura Halo",
+    "inStock": true,
+    "stockCount": 3,
+    "featured": true,
+    "rating": 5,
+    "reviewsCount": 9,
+    "tags": [
+      "Halo",
+      "Vàng Trắng",
+      "Kim cương 1.5ct"
+    ],
+    "sizes": [
+      "7",
+      "8",
+      "9",
+      "10",
+      "11"
+    ],
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.045Z",
+    "updatedAt": "2026-08-26T03:32:17.045Z"
+  },
+  {
+    "_id": "prod-pendant-lumiere-3",
+    "name": "Dây Chuyền Kim Cương Etoile 0.8ct",
+    "sku": "3AE-N-ETOILE-03",
+    "slug": "day-chuyen-kim-cuong-etoile-0-8ct",
+    "categoryId": "cat-day-chuyen",
+    "categoryName": "Dây Chuyền & Mặt Dây",
+    "price": 58000000,
+    "salePrice": 55100000,
+    "discountPercent": 5,
+    "images": [
+      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "Thiết kế giọt sương mai đính viên kim cương Round 0.8 Carat nước D tinh khiết.",
+    "details": "Mặt dây chuyền vàng trắng 18K Italy thanh mảnh, ôm trọn viên kim cương rực sáng.",
+    "carat": 0.8,
+    "cut": "Excellent",
+    "color": "D",
+    "clarity": "VVS1",
+    "certificate": "GIA",
+    "material": "Vàng Trắng 18K",
+    "gender": "women",
+    "collectionType": "Etoile Star",
+    "inStock": true,
+    "stockCount": 8,
+    "featured": true,
+    "rating": 5,
+    "reviewsCount": 18,
+    "tags": [
+      "Dây chuyền",
+      "Kim cương 0.8ct",
+      "GIA"
+    ],
+    "sizes": [
+      "40cm",
+      "42cm",
+      "45cm"
+    ],
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.045Z",
+    "updatedAt": "2026-08-26T03:32:17.045Z"
+  },
+  {
+    "_id": "prod-earring-brilliant-4",
+    "name": "Bông Tai Kim Cương Brilliant Studs 1.0ct Cặp",
+    "sku": "3AE-E-STUDS-04",
+    "slug": "bong-tai-kim-cuong-brilliant-studs-1-0ct",
+    "categoryId": "cat-bong-tai",
+    "categoryName": "Bông Tai Kim Cương",
+    "price": 68000000,
+    "discountPercent": 0,
+    "images": [
+      "https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "Cặp bông tai nụ kim cương kinh điển 4 chấu, mỗi bên 0.5 Carat nước E sạch VS1.",
+    "details": "Chất liệu Vàng Trắng 18K hoặc Vàng Vàng 18K.",
+    "carat": 1,
+    "cut": "Excellent",
+    "color": "E",
+    "clarity": "VS1",
+    "certificate": "GIA",
+    "material": "Vàng Trắng 18K",
+    "gender": "women",
+    "collectionType": "Classic Studs",
+    "inStock": true,
+    "stockCount": 6,
+    "featured": false,
+    "rating": 5,
+    "reviewsCount": 7,
+    "tags": [
+      "Bông tai",
+      "Kim cương nụ",
+      "GIA"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ],
+    "__v": 0,
+    "createdAt": "2026-08-26T03:32:17.045Z",
+    "updatedAt": "2026-08-26T03:32:17.045Z"
+  }
+]

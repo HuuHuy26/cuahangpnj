@@ -23,6 +23,7 @@ import { useToast } from '../context/ToastContext';
 import { apiService } from '../services/api';
 import { PaymentMethod } from '../types';
 import { formatCurrency } from '../utils/formatters';
+import { validatePhoneNumber } from '../utils/validators';
 
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -72,6 +73,12 @@ export const CheckoutPage: React.FC = () => {
     e.preventDefault();
     if (!fullName.trim() || !phone.trim() || !address.trim()) {
       showToast('Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ nhận hàng', 'error');
+      return;
+    }
+
+    const phoneValidation = validatePhoneNumber(phone);
+    if (!phoneValidation.isValid) {
+      showToast(phoneValidation.message, 'error');
       return;
     }
 

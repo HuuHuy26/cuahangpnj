@@ -12,13 +12,15 @@ interface InvoiceModalProps {
 // Convert number to Vietnamese words for invoice summary
 function numberToVietnameseWords(num: number): string {
   if (num === 0) return 'Không đồng';
-  const units = ['', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
-  // Simplified high-level formatter
-  const millions = Math.floor(num / 1000000);
+  const billions = Math.floor(num / 1000000000);
+  const millions = Math.floor((num % 1000000000) / 1000000);
   const thousands = Math.floor((num % 1000000) / 1000);
   const remainder = num % 1000;
 
   let result = '';
+  if (billions > 0) {
+    result += `${billions.toLocaleString('vi-VN')} tỷ `;
+  }
   if (millions > 0) {
     result += `${millions.toLocaleString('vi-VN')} triệu `;
   }
@@ -40,10 +42,12 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
   };
 
   // Subtotal before tax, VAT 10%, Total
-  const subtotalBeforeVat = order.subtotal - (order.discount || 0);
-  const vatRate = 10;
-  const vatAmount = (order as any).vatAmount || Math.round(subtotalBeforeVat * 0.10);
-  const grandTotal = order.total || (subtotalBeforeVat + vatAmount + (order.shippingFee || 0));
+  const subtotalBeforeVat = Math.max(0, order.subtotal - (order.discount || 0));
+  const vatRate = order.vatRate !== undefined ? order.vatRate : 10;
+  const vatAmount = order.vatAmount !== undefined ? order.vatAmount : Math.round(subtotalBeforeVat * (vatRate / 100));
+  const shippingFee = order.shippingFee || 0;
+  // Grand total must strictly add VAT 10%
+  const grandTotal = subtotalBeforeVat + vatAmount + shippingFee;
 
   const invoiceNumber = (order.orderCode || '3AE').replace(/\D/g, '').slice(-6).padStart(6, '0');
   const invoiceDate = new Date(order.createdAt || Date.now());
